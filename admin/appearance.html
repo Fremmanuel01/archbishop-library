@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Archbishop Library — Appearance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lora:wght@400;500;600&family=Merriweather:wght@400;700&family=Crimson+Text:wght@400;600;700&family=EB+Garamond:wght@400;600;700&family=Libre+Baskerville:wght@400;700&family=Source+Serif+4:wght@400;600;700&family=Roboto:wght@400;500;700&family=Open+Sans:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <!-- ── Sidebar ─────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span class="crest">✝</span>
+      <h2>Archbishop Library</h2>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Content</div>
+      <a href="dashboard.html" data-page="pastoral_letters">
+        <span class="icon">📜</span> Pastoral Letters
+      </a>
+      <a href="dashboard.html" data-page="homilies">
+        <span class="icon">🎙</span> Homilies
+      </a>
+      <a href="dashboard.html" data-page="writings">
+        <span class="icon">✍</span> Writings
+      </a>
+      <div class="nav-label">Customization</div>
+      <a href="appearance.html" class="active">
+        <span class="icon">🎨</span> Appearance
+      </a>
+      <div class="nav-label">System</div>
+      <a href="dashboard.html" data-page="settings">
+        <span class="icon">⚙</span> Settings
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="avatar" id="avatarInitial">A</div>
+        <div>
+          <div class="user-name" id="displayUsername">Admin</div>
+          <div class="user-role">Administrator</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- ── Main ────────────────────────────────── -->
+  <div class="main">
+    <header class="topbar">
+      <button class="mobile-toggle" id="mobileToggle">☰</button>
+      <h1>Appearance Settings</h1>
+      <span class="breadcrumb">Dashboard / Appearance</span>
+    </header>
+
+    <div class="content">
+      <div class="appearance-layout">
+
+        <!-- ── Controls Panel ────────────────── -->
+        <div class="appearance-controls">
+          <div class="tab-bar">
+            <button class="active" data-tab="pastoral_letters">Pastoral Letters</button>
+            <button data-tab="homilies">Homilies</button>
+            <button data-tab="writings">Writings</button>
+          </div>
+
+          <div class="controls-body">
+
+            <!-- Layout Picker -->
+            <div class="control-section">
+              <h4>Layout</h4>
+              <div class="layout-picker">
+                <div class="layout-option selected" data-layout="grid">
+                  <div class="layout-icon">▦</div>
+                  <div class="layout-name">Grid View</div>
+                </div>
+                <div class="layout-option" data-layout="list">
+                  <div class="layout-icon">☰</div>
+                  <div class="layout-name">List View</div>
+                </div>
+                <div class="layout-option" data-layout="magazine">
+                  <div class="layout-icon">▣</div>
+                  <div class="layout-name">Magazine View</div>
+                </div>
+                <div class="layout-option" data-layout="table">
+                  <div class="layout-icon">▤</div>
+                  <div class="layout-name">Table View</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Colors -->
+            <div class="control-section">
+              <h4>Colors</h4>
+              <div class="color-grid">
+                <div class="color-field">
+                  <label>Primary</label>
+                  <input type="color" id="primaryColor" value="#1a3c6e">
+                </div>
+                <div class="color-field">
+                  <label>Background</label>
+                  <input type="color" id="backgroundColor" value="#ffffff">
+                </div>
+                <div class="color-field">
+                  <label>Text</label>
+                  <input type="color" id="textColor" value="#333333">
+                </div>
+                <div class="color-field">
+                  <label>Accent</label>
+                  <input type="color" id="accentColor" value="#c9a84c">
+                </div>
+              </div>
+            </div>
+
+            <!-- Fonts -->
+            <div class="control-section">
+              <h4>Typography</h4>
+              <div class="font-grid">
+                <div class="form-group">
+                  <label for="headingFont">Heading Font</label>
+                  <select id="headingFont">
+                    <option value="Playfair Display">Playfair Display</option>
+                    <option value="Merriweather">Merriweather</option>
+                    <option value="Crimson Text">Crimson Text</option>
+                    <option value="EB Garamond">EB Garamond</option>
+                    <option value="Libre Baskerville">Libre Baskerville</option>
+                    <option value="Source Serif 4">Source Serif 4</option>
+                    <option value="Georgia">Georgia</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="bodyFont">Body Font</label>
+                  <select id="bodyFont">
+                    <option value="Lora">Lora</option>
+                    <option value="Merriweather">Merriweather</option>
+                    <option value="Crimson Text">Crimson Text</option>
+                    <option value="Source Serif 4">Source Serif 4</option>
+                    <option value="Roboto">Roboto</option>
+                    <option value="Open Sans">Open Sans</option>
+                    <option value="Inter">Inter</option>
+                    <option value="Georgia">Georgia</option>
+                  </select>
+                </div>
+              </div>
+              <div class="slider-field">
+                <label>
+                  <span>Font Size</span>
+                  <span id="fontSizeValue">16px</span>
+                </label>
+                <input type="range" id="fontSize" min="12" max="22" value="16">
+              </div>
+            </div>
+
+            <!-- Back Button -->
+            <div class="control-section">
+              <h4>Back Button</h4>
+              <div class="form-group">
+                <label for="backButtonLabel">Label</label>
+                <input type="text" id="backButtonLabel" value="Visit Archbishop Website">
+              </div>
+              <div class="form-group">
+                <label for="backButtonUrl">URL</label>
+                <input type="url" id="backButtonUrl" value="https://archbishopokeke.com">
+              </div>
+              <div class="form-group">
+                <label for="backButtonPosition">Position</label>
+                <select id="backButtonPosition">
+                  <option value="top">Top</option>
+                  <option value="bottom">Bottom</option>
+                  <option value="both" selected>Both</option>
+                </select>
+              </div>
+              <div class="color-field" style="margin-bottom:14px;">
+                <label>Button Color</label>
+                <input type="color" id="backButtonColor" value="#c9a84c">
+              </div>
+              <div class="form-group">
+                <label for="backButtonVisibility">Visibility</label>
+                <select id="backButtonVisibility">
+                  <option value="both">Both Sites</option>
+                  <option value="admissions">Admissions Only</option>
+                  <option value="archdiocese">Archdiocese Only</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Save -->
+            <button class="btn-gold" id="saveSettingsBtn" style="width:100%;margin-top:8px;">
+              Save Settings
+            </button>
+
+          </div>
+        </div>
+
+        <!-- ── Preview Panel ─────────────────── -->
+        <div class="preview-panel">
+          <div class="preview-header">Live Preview</div>
+          <div class="preview-body" id="previewBody">
+            <!-- Preview rendered by JS -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Toast Container ─────────────────────── -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    /* ── Auth guard ────────────────────────── */
+    const TOKEN = localStorage.getItem('ab_token');
+    if (!TOKEN) window.location.href = 'index.html';
+
+    const API = window.location.origin + '/api';
+
+    /* ── State ─────────────────────────────── */
+    let activeTab = 'pastoral_letters';
+    let settings = {};
+
+    /* ── Init ──────────────────────────────── */
+    document.addEventListener('DOMContentLoaded', () => {
+      setupUsername();
+      setupLogout();
+      setupMobileToggle();
+      setupTabs();
+      setupLivePreview();
+      setupLayoutPicker();
+      setupSave();
+      loadSettings(activeTab);
+    });
+
+    function setupUsername() {
+      const u = localStorage.getItem('ab_username') || 'Admin';
+      document.getElementById('displayUsername').textContent = u;
+      document.getElementById('avatarInitial').textContent = u.charAt(0).toUpperCase();
+    }
+
+    function setupLogout() {
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem('ab_token');
+        localStorage.removeItem('ab_username');
+        window.location.href = 'index.html';
+      });
+    }
+
+    function setupMobileToggle() {
+      document.getElementById('mobileToggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('open');
+      });
+    }
+
+    /* ── Tabs ──────────────────────────────── */
+
+    function setupTabs() {
+      document.querySelectorAll('.tab-bar button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          activeTab = btn.dataset.tab;
+          loadSettings(activeTab);
+        });
+      });
+    }
+
+    /* ── Load settings from API ────────────── */
+
+    async function loadSettings(section) {
+      try {
+        const res = await fetch(API + '/settings/' + section);
+        const data = await res.json();
+        if (data.success) {
+          settings = data.data;
+          populateControls(settings);
+          updatePreview();
+        }
+      } catch (err) {
+        showToast('Failed to load settings.', 'error');
+      }
+    }
+
+    function populateControls(s) {
+      /* Layout */
+      document.querySelectorAll('.layout-option').forEach(opt => {
+        opt.classList.toggle('selected', opt.dataset.layout === s.layout);
+      });
+
+      /* Colors */
+      document.getElementById('primaryColor').value = s.primary_color;
+      document.getElementById('backgroundColor').value = s.background_color;
+      document.getElementById('textColor').value = s.text_color;
+      document.getElementById('accentColor').value = s.accent_color;
+
+      /* Fonts */
+      document.getElementById('headingFont').value = s.heading_font;
+      document.getElementById('bodyFont').value = s.body_font;
+      const size = parseInt(s.font_size) || 16;
+      document.getElementById('fontSize').value = size;
+      document.getElementById('fontSizeValue').textContent = size + 'px';
+
+      /* Back button */
+      document.getElementById('backButtonLabel').value = s.back_button_label;
+      document.getElementById('backButtonUrl').value = s.back_button_url;
+      document.getElementById('backButtonPosition').value = s.back_button_position;
+      document.getElementById('backButtonColor').value = s.back_button_color;
+      document.getElementById('backButtonVisibility').value = s.back_button_visibility;
+    }
+
+    /* ── Layout picker ─────────────────────── */
+
+    function setupLayoutPicker() {
+      document.querySelectorAll('.layout-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+          document.querySelectorAll('.layout-option').forEach(o => o.classList.remove('selected'));
+          opt.classList.add('selected');
+          updatePreview();
+        });
+      });
+    }
+
+    /* ── Live Preview ──────────────────────── */
+
+    function setupLivePreview() {
+      const inputs = [
+        'primaryColor', 'backgroundColor', 'textColor', 'accentColor',
+        'headingFont', 'bodyFont', 'fontSize',
+        'backButtonLabel', 'backButtonUrl', 'backButtonPosition',
+        'backButtonColor', 'backButtonVisibility'
+      ];
+
+      inputs.forEach(id => {
+        const el = document.getElementById(id);
+        el.addEventListener('input', () => {
+          if (id === 'fontSize') {
+            document.getElementById('fontSizeValue').textContent = el.value + 'px';
+          }
+          updatePreview();
+        });
+      });
+    }
+
+    function getControlValues() {
+      const selected = document.querySelector('.layout-option.selected');
+      return {
+        layout: selected ? selected.dataset.layout : 'grid',
+        primary_color: document.getElementById('primaryColor').value,
+        background_color: document.getElementById('backgroundColor').value,
+        text_color: document.getElementById('textColor').value,
+        accent_color: document.getElementById('accentColor').value,
+        heading_font: document.getElementById('headingFont').value,
+        body_font: document.getElementById('bodyFont').value,
+        font_size: document.getElementById('fontSize').value + 'px',
+        back_button_label: document.getElementById('backButtonLabel').value,
+        back_button_url: document.getElementById('backButtonUrl').value,
+        back_button_position: document.getElementById('backButtonPosition').value,
+        back_button_color: document.getElementById('backButtonColor').value,
+        back_button_visibility: document.getElementById('backButtonVisibility').value
+      };
+    }
+
+    function updatePreview() {
+      const v = getControlValues();
+      const preview = document.getElementById('previewBody');
+
+      /* Sample content for preview */
+      const sampleItems = [
+        { title: 'Message for Christmas Season', date: '2024-12-25', description: 'A heartfelt letter to the faithful during the season of joy and hope.' },
+        { title: 'Lenten Pastoral Letter 2024', date: '2024-02-14', description: 'Reflections on fasting, prayer, and almsgiving during the holy season.' },
+        { title: 'On the Feast of the Assumption', date: '2024-08-15', description: 'Celebrating the Blessed Virgin Mary and her role in our faith journey.' }
+      ];
+
+      const backBtn = `<a href="${escAttr(v.back_button_url)}" style="
+        display:inline-block;padding:8px 18px;background:${v.back_button_color};
+        color:#fff;text-decoration:none;border-radius:6px;font-size:13px;
+        font-family:${v.body_font},serif;font-weight:600;
+      ">${esc(v.back_button_label)}</a>`;
+
+      const showTopBtn = v.back_button_position === 'top' || v.back_button_position === 'both';
+      const showBottomBtn = v.back_button_position === 'bottom' || v.back_button_position === 'both';
+
+      let html = `<div style="
+        background:${v.background_color};color:${v.text_color};
+        font-family:'${v.body_font}',serif;font-size:${v.font_size};
+        padding:16px;border-radius:8px;min-height:300px;
+      ">`;
+
+      if (showTopBtn) {
+        html += `<div style="margin-bottom:16px;">${backBtn}</div>`;
+      }
+
+      if (v.layout === 'grid') {
+        html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">`;
+        sampleItems.forEach(item => {
+          html += `<div style="background:${v.background_color};border:1px solid ${v.primary_color}22;border-radius:8px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <div style="width:100%;height:60px;background:${v.primary_color}15;border-radius:4px;margin-bottom:10px;"></div>
+            <h3 style="font-family:'${v.heading_font}',serif;font-size:14px;color:${v.primary_color};margin-bottom:4px;">${esc(item.title)}</h3>
+            <p style="font-size:11px;color:${v.text_color}99;margin-bottom:6px;">${item.date}</p>
+            <p style="font-size:12px;line-height:1.4;margin-bottom:8px;">${esc(item.description)}</p>
+            <a href="#" style="color:${v.accent_color};font-size:12px;font-weight:600;text-decoration:none;">Read More</a>
+          </div>`;
+        });
+        html += `</div>`;
+
+      } else if (v.layout === 'list') {
+        sampleItems.forEach(item => {
+          html += `<div style="padding:12px 0;border-bottom:1px solid ${v.text_color}15;">
+            <h3 style="font-family:'${v.heading_font}',serif;font-size:15px;color:${v.primary_color};margin-bottom:3px;">${esc(item.title)}</h3>
+            <p style="font-size:11px;color:${v.text_color}88;margin-bottom:4px;">${item.date}</p>
+            <p style="font-size:12px;line-height:1.4;">${esc(item.description)}</p>
+          </div>`;
+        });
+
+      } else if (v.layout === 'magazine') {
+        const featured = sampleItems[0];
+        html += `<div style="background:${v.primary_color}10;border-radius:8px;padding:16px;margin-bottom:14px;">
+          <div style="width:100%;height:80px;background:${v.primary_color}20;border-radius:4px;margin-bottom:10px;"></div>
+          <h3 style="font-family:'${v.heading_font}',serif;font-size:16px;color:${v.primary_color};margin-bottom:4px;">${esc(featured.title)}</h3>
+          <p style="font-size:12px;line-height:1.4;">${esc(featured.description)}</p>
+        </div>`;
+        html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">`;
+        sampleItems.slice(1).forEach(item => {
+          html += `<div style="border:1px solid ${v.text_color}15;border-radius:6px;padding:12px;">
+            <h3 style="font-family:'${v.heading_font}',serif;font-size:13px;color:${v.primary_color};margin-bottom:3px;">${esc(item.title)}</h3>
+            <p style="font-size:11px;color:${v.text_color}88;">${item.date}</p>
+          </div>`;
+        });
+        html += `</div>`;
+
+      } else if (v.layout === 'table') {
+        html += `<table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead><tr style="background:${v.primary_color};color:#fff;">
+            <th style="padding:8px;text-align:left;font-family:'${v.heading_font}',serif;">Title</th>
+            <th style="padding:8px;text-align:left;">Date</th>
+            <th style="padding:8px;text-align:left;">Description</th>
+          </tr></thead><tbody>`;
+        sampleItems.forEach((item, i) => {
+          const bg = i % 2 ? v.background_color : v.primary_color + '08';
+          html += `<tr style="background:${bg};">
+            <td style="padding:8px;font-weight:600;">${esc(item.title)}</td>
+            <td style="padding:8px;">${item.date}</td>
+            <td style="padding:8px;">${esc(item.description)}</td>
+          </tr>`;
+        });
+        html += `</tbody></table>`;
+      }
+
+      if (showBottomBtn) {
+        html += `<div style="margin-top:16px;">${backBtn}</div>`;
+      }
+
+      html += `</div>`;
+      preview.innerHTML = html;
+    }
+
+    /* ── Save Settings ─────────────────────── */
+
+    function setupSave() {
+      document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('saveSettingsBtn');
+        btn.disabled = true;
+        btn.textContent = 'Saving…';
+
+        const values = getControlValues();
+
+        try {
+          const res = await fetch(API + '/settings/' + activeTab, {
+            method: 'PUT',
+            headers: {
+              'Authorization': 'Bearer ' + TOKEN,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(values)
+          });
+
+          const data = await res.json();
+
+          if (data.success) {
+            showToast('Appearance settings saved!', 'success');
+          } else {
+            showToast(data.message || 'Failed to save settings.', 'error');
+          }
+        } catch (err) {
+          showToast('Failed to save settings.', 'error');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Save Settings';
+        }
+      });
+    }
+
+    /* ── Helpers ───────────────────────────── */
+
+    function esc(str) {
+      if (!str) return '';
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    function escAttr(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function showToast(message, type) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast ' + type;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 4000);
+    }
+  </script>
+</body>
+</html>

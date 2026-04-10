@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Archbishop Library — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <!-- ── Sidebar ─────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span class="crest">✝</span>
+      <h2>Archbishop Library</h2>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Content</div>
+      <a href="#" class="active" data-page="pastoral_letters">
+        <span class="icon">📜</span> Pastoral Letters
+      </a>
+      <a href="#" data-page="homilies">
+        <span class="icon">🎙</span> Homilies
+      </a>
+      <a href="#" data-page="writings">
+        <span class="icon">✍</span> Writings
+      </a>
+      <div class="nav-label">Customization</div>
+      <a href="appearance.html">
+        <span class="icon">🎨</span> Appearance
+      </a>
+      <div class="nav-label">System</div>
+      <a href="#" data-page="settings">
+        <span class="icon">⚙</span> Settings
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="avatar" id="avatarInitial">A</div>
+        <div>
+          <div class="user-name" id="displayUsername">Admin</div>
+          <div class="user-role">Administrator</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- ── Main ────────────────────────────────── -->
+  <div class="main">
+    <header class="topbar">
+      <button class="mobile-toggle" id="mobileToggle">☰</button>
+      <h1 id="pageTitle">Pastoral Letters</h1>
+      <span class="breadcrumb" id="breadcrumb">Dashboard / Pastoral Letters</span>
+    </header>
+
+    <div class="content">
+
+      <!-- ── Stats Row ──────────────────────── -->
+      <div class="stats-row" id="statsRow">
+        <div class="stat-card">
+          <div class="stat-label">Pastoral Letters</div>
+          <div class="stat-value" id="statLetters">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Homilies</div>
+          <div class="stat-value" id="statHomilies">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Writings</div>
+          <div class="stat-value" id="statWritings">0</div>
+        </div>
+      </div>
+
+      <!-- ══ Pastoral Letters Section ═══════════ -->
+      <div class="page-section active" id="section-pastoral_letters">
+        <div class="section-header">
+          <h2>Pastoral Letters</h2>
+          <button class="btn-primary" onclick="openModal('pastoral_letters')">+ Add New</button>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Date</th>
+                <th>PDF</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="table-pastoral_letters"></tbody>
+          </table>
+          <div class="empty-state" id="empty-pastoral_letters" style="display:none;">
+            <div class="icon">📜</div>
+            <p>No pastoral letters yet. Click "Add New" to create one.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ Homilies Section ═══════════════════ -->
+      <div class="page-section" id="section-homilies">
+        <div class="section-header">
+          <h2>Homilies</h2>
+          <button class="btn-primary" onclick="openModal('homilies')">+ Add New</button>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Occasion</th>
+                <th>Date</th>
+                <th>PDF</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="table-homilies"></tbody>
+          </table>
+          <div class="empty-state" id="empty-homilies" style="display:none;">
+            <div class="icon">🎙</div>
+            <p>No homilies yet. Click "Add New" to create one.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ Writings Section ═══════════════════ -->
+      <div class="page-section" id="section-writings">
+        <div class="section-header">
+          <h2>Writings</h2>
+          <button class="btn-primary" onclick="openModal('writings')">+ Add New</button>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="table-writings"></tbody>
+          </table>
+          <div class="empty-state" id="empty-writings" style="display:none;">
+            <div class="icon">✍</div>
+            <p>No writings yet. Click "Add New" to create one.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ Settings Section ═══════════════════ -->
+      <div class="page-section" id="section-settings">
+        <div class="settings-card">
+          <h3>API Information</h3>
+          <div class="info-row">
+            <span class="label">API Base URL</span>
+            <span class="value" id="apiBaseUrl"></span>
+            <button class="copy-btn" onclick="copyToClipboard(document.getElementById('apiBaseUrl').textContent)">Copy</button>
+          </div>
+          <p class="help-text" style="margin-top:12px;font-size:13px;color:#777;">
+            Paste this URL into your WordPress plugin settings page to connect.
+          </p>
+        </div>
+
+        <div class="settings-card">
+          <h3>Change Password</h3>
+          <form id="changePasswordForm">
+            <div class="form-group">
+              <label for="currentPassword">Current Password</label>
+              <input type="password" id="currentPassword" required>
+            </div>
+            <div class="form-group">
+              <label for="newPassword">New Password</label>
+              <input type="password" id="newPassword" required>
+            </div>
+            <div class="form-group">
+              <label for="confirmPassword">Confirm New Password</label>
+              <input type="password" id="confirmPassword" required>
+            </div>
+            <button type="submit" class="btn-primary">Update Password</button>
+          </form>
+        </div>
+
+        <div class="settings-card">
+          <h3>WordPress Sites</h3>
+          <div class="info-row">
+            <span class="label">Archdiocese Website</span>
+            <span class="value">archbishopokeke.com</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Admissions Portal</span>
+            <span class="value">admissions.archbishopokeke.com</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Modal ───────────────────────────────── -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add New</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="contentForm">
+          <input type="hidden" id="editId">
+          <input type="hidden" id="editType">
+
+          <div class="form-group">
+            <label for="fieldTitle">Title *</label>
+            <input type="text" id="fieldTitle" required>
+          </div>
+
+          <div class="form-group" id="groupDescription">
+            <label for="fieldDescription">Description</label>
+            <textarea id="fieldDescription" rows="3"></textarea>
+          </div>
+
+          <div class="form-group" id="groupBody" style="display:none;">
+            <label for="fieldBody">Body</label>
+            <textarea id="fieldBody" rows="8"></textarea>
+          </div>
+
+          <div class="form-group" id="groupOccasion" style="display:none;">
+            <label for="fieldOccasion">Occasion</label>
+            <input type="text" id="fieldOccasion" placeholder="e.g. Christmas Mass, Easter Vigil">
+          </div>
+
+          <div class="form-group" id="groupCategory" style="display:none;">
+            <label for="fieldCategory">Category</label>
+            <input type="text" id="fieldCategory" placeholder="e.g. Reflection, Article, Theology">
+          </div>
+
+          <div class="form-group">
+            <label for="fieldDate">Date</label>
+            <input type="date" id="fieldDate">
+          </div>
+
+          <div class="form-group" id="groupPdf" style="display:none;">
+            <label for="fieldPdf">PDF File</label>
+            <input type="file" id="fieldPdf" accept=".pdf">
+            <span class="help-text">Max 10 MB. PDF only.</span>
+          </div>
+
+          <div class="form-group" id="groupThumbnail" style="display:none;">
+            <label for="fieldThumbnail">Thumbnail Image</label>
+            <input type="file" id="fieldThumbnail" accept=".jpg,.jpeg,.png">
+            <span class="help-text">Max 10 MB. JPG or PNG.</span>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn-primary" id="modalSaveBtn" onclick="saveContent()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Confirm Dialog ──────────────────────── -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-dialog">
+      <h3>Confirm Deletion</h3>
+      <p id="confirmMessage">Are you sure you want to delete this item? This action cannot be undone.</p>
+      <div class="confirm-actions">
+        <button class="btn-secondary" onclick="closeConfirm()">Cancel</button>
+        <button class="btn-danger" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Toast Container ─────────────────────── -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
