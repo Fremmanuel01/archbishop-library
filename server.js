@@ -204,11 +204,18 @@ app.get('/', (req, res) => {
 });
 
 /* ──────────────────────────────────────────────
-   Start server
+   Start server (after database initialization)
    ────────────────────────────────────────────── */
 
-app.listen(PORT, () => {
-  console.log(`Archbishop Library CMS running on port ${PORT}`);
-  console.log(`Admin dashboard: http://localhost:${PORT}/admin`);
-  console.log(`API base URL:    http://localhost:${PORT}/api`);
+const { initDatabase } = require('./database');
+
+initDatabase().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Archbishop Library CMS running on port ${PORT}`);
+    console.log(`Admin dashboard: http://localhost:${PORT}/admin`);
+    console.log(`API base URL:    http://localhost:${PORT}/api`);
+  });
+}).catch(err => {
+  console.error('Failed to initialize database:', err);
+  process.exit(1);
 });
