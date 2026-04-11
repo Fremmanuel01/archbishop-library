@@ -266,9 +266,9 @@ router.put('/:id', authenticateToken, (req, res) => {
         return res.status(404).json({ success: false, message: 'Pastoral letter not found.' });
       }
 
-      const { title, description, date, key_quote, tags, reading_time, tone, highlights } = req.body;
+      const { title, description, date, key_quote, tags, reading_time, tone, highlights, cover_photo_url } = req.body;
 
-      let coverPhotoUrl = existing.cover_photo_url;
+      let coverPhotoUrl = cover_photo_url || existing.cover_photo_url;
       let pdfUrl = existing.pdf_url;
 
       if (coverFile) {

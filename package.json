@@ -23,5 +23,8 @@
     "pdf-parse": "^2.4.5",
     "playwright": "^1.59.1",
     "sql.js": "^1.14.1"
+  },
+  "devDependencies": {
+    "canvas": "^3.2.3"
   }
 }
