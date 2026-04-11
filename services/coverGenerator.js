@@ -12,7 +12,7 @@ cloudinary.config({
  *
  * @param {string} title — Document title
  * @param {string|null} date — Date string
- * @param {string} contentType — 'homily' or 'writing'
+ * @param {string} contentType — 'homily', 'writing', or 'pastoral_letter'
  * @returns {string|null} Cloudinary URL of the generated cover, or null on failure
  */
 async function generateCover(title, date, contentType) {
@@ -22,7 +22,8 @@ async function generateCover(title, date, contentType) {
       return null;
     }
 
-    const label = contentType === 'homily' ? 'REFLECTION' : 'TEACHING';
+    const labels = { 'homily': 'REFLECTION', 'writing': 'TEACHING', 'pastoral_letter': 'PASTORAL LETTER' };
+    const label = labels[contentType] || 'DOCUMENT';
 
     /* Extract year from date */
     let year = new Date().getFullYear().toString();

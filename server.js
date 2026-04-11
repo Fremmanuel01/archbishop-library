@@ -149,6 +149,52 @@ app.use('/api/writings', writingsRouter);
 app.use('/api/settings', settingsRouter);
 
 /* ──────────────────────────────────────────────
+   Batch cover generation — generates covers for
+   all items that don't have one
+   ────────────────────────────────────────────── */
+
+const { generateCover } = require('./services/coverGenerator');
+
+app.post('/api/generate-covers', authenticateToken, async (req, res) => {
+  try {
+    const tables = [
+      { table: 'pastoral_letters', type: 'pastoral_letter' },
+      { table: 'homilies', type: 'homily' },
+      { table: 'writings', type: 'writing' }
+    ];
+
+    let generated = 0;
+    let failed = 0;
+
+    for (const { table, type } of tables) {
+      const items = db.prepare(
+        `SELECT id, title, date FROM ${table} WHERE cover_photo_url IS NULL OR cover_photo_url = ''`
+      ).all();
+
+      for (const item of items) {
+        try {
+          const coverUrl = await generateCover(item.title, item.date, type);
+          if (coverUrl) {
+            db.prepare(`UPDATE ${table} SET cover_photo_url = ?, thumbnail_url = ? WHERE id = ?`)
+              .run(coverUrl, coverUrl, item.id);
+            generated++;
+          } else {
+            failed++;
+          }
+        } catch (e) {
+          failed++;
+        }
+      }
+    }
+
+    res.json({ success: true, data: { generated, failed } });
+  } catch (err) {
+    console.error('Batch cover error:', err);
+    res.status(500).json({ success: false, message: 'Failed to generate covers.' });
+  }
+});
+
+/* ──────────────────────────────────────────────
    PDF Proxy — serves external PDFs through our
    domain so PDF.js can load them (CORS bypass)
    ────────────────────────────────────────────── */
