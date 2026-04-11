@@ -2,7 +2,21 @@ const initSqlJs = require('sql.js');
 const fs = require('fs');
 const path = require('path');
 
-const dbPath = path.join(__dirname, 'archbishop_library.db');
+/*
+ * Database path: Use DB_PATH env var for production (persists across deploys).
+ * Falls back to project directory for local development.
+ * On Hostinger, set DB_PATH to a directory outside the deploy folder,
+ * e.g. /home/u370958633/archbishop_data/archbishop_library.db
+ */
+const dbDir = process.env.DB_PATH
+  ? path.dirname(process.env.DB_PATH)
+  : __dirname;
+const dbPath = process.env.DB_PATH || path.join(__dirname, 'archbishop_library.db');
+
+/* Ensure the directory exists */
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
 
 /**
  * sql.js wrapper that mimics the better-sqlite3 API surface.
