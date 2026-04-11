@@ -4,3 +4,7 @@ uploads/
 *.db
 *.db-shm
 *.db-wal
+.DS_Store
+tests/screenshots/
+tests/screenshots-v2/
+tests/test-cover*.png

@@ -85,4 +85,41 @@ const seedTransaction = db.transaction(() => {
 
 seedTransaction();
 
+/* ──────────────────────────────────────────────
+   Migrations — add new columns safely
+   ────────────────────────────────────────────── */
+
+function addColumn(table, column, type) {
+  try {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`);
+  } catch (e) {
+    /* Column already exists — ignore */
+  }
+}
+
+/* Pastoral Letters — new columns */
+addColumn('pastoral_letters', 'cover_photo_url', 'TEXT');
+addColumn('pastoral_letters', 'key_quote', 'TEXT');
+addColumn('pastoral_letters', 'tags', 'TEXT');
+addColumn('pastoral_letters', 'reading_time', 'TEXT');
+addColumn('pastoral_letters', 'tone', 'TEXT');
+addColumn('pastoral_letters', 'highlights', 'TEXT');
+
+/* Homilies — new columns */
+addColumn('homilies', 'cover_photo_url', 'TEXT');
+addColumn('homilies', 'key_quote', 'TEXT');
+addColumn('homilies', 'tags', 'TEXT');
+addColumn('homilies', 'reading_time', 'TEXT');
+addColumn('homilies', 'tone', 'TEXT');
+addColumn('homilies', 'highlights', 'TEXT');
+
+/* Writings — new columns */
+addColumn('writings', 'cover_photo_url', 'TEXT');
+addColumn('writings', 'pdf_url', 'TEXT');
+addColumn('writings', 'key_quote', 'TEXT');
+addColumn('writings', 'tags', 'TEXT');
+addColumn('writings', 'reading_time', 'TEXT');
+addColumn('writings', 'tone', 'TEXT');
+addColumn('writings', 'highlights', 'TEXT');
+
 module.exports = db;

@@ -6,7 +6,7 @@
   <title>Archbishop Library — Admin Login</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -21,7 +21,8 @@
       --text: #333333;
       --text-muted: #777777;
       --danger: #c0392b;
-      --font-heading: 'Playfair Display', Georgia, serif;
+      --font-heading: 'Cinzel Decorative', 'Cinzel', Georgia, serif;
+      --font-display: 'Cinzel', Georgia, serif;
       --font-body: 'Lora', 'Times New Roman', serif;
     }
 
@@ -56,34 +57,33 @@
     }
 
     .login-card .crest {
-      width: 80px;
-      height: 80px;
+      width: 100px;
+      height: auto;
       margin: 0 auto 20px;
-      background: var(--navy);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--gold);
-      font-family: var(--font-heading);
-      font-size: 32px;
-      font-weight: 700;
-      box-shadow: 0 4px 12px rgba(26, 60, 110, 0.3);
+      display: block;
+    }
+
+    .login-card .crest img {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
     }
 
     .login-card h1 {
       font-family: var(--font-heading);
       font-size: 22px;
-      font-weight: 700;
+      font-weight: 400;
       color: var(--navy);
       margin-bottom: 4px;
     }
 
     .login-card .subtitle {
-      font-size: 13px;
+      font-family: var(--font-display);
+      font-size: 11px;
       color: var(--text-muted);
       margin-bottom: 32px;
-      letter-spacing: 0.5px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
     }
 
     .form-group {
@@ -120,24 +120,25 @@
 
     .btn-login {
       width: 100%;
-      padding: 14px;
-      font-family: var(--font-heading);
-      font-size: 16px;
+      padding: calc(.667em + 2px) calc(1.333em + 2px);
+      font-family: var(--font-display);
+      font-size: 13px;
       font-weight: 600;
       color: var(--white);
       background: var(--navy);
       border: none;
-      border-radius: 8px;
+      border-radius: 9999px;
       cursor: pointer;
-      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
       margin-top: 8px;
     }
 
     .btn-login:hover {
       background: var(--navy-dark);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(26, 60, 110, 0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(26, 60, 110, 0.35);
     }
 
     .btn-login:active {
@@ -182,9 +183,9 @@
 <body>
   <div class="login-wrapper">
     <div class="login-card">
-      <div class="crest">✝</div>
+      <div class="crest"><img src="assets/crest.png" alt="Archbishop Coat of Arms"></div>
       <h1>Archbishop Library</h1>
-      <p class="subtitle">Content Management System</p>
+      <p class="subtitle">✦ Content Management System ✦</p>
 
       <div class="error-msg" id="errorMsg"></div>
 

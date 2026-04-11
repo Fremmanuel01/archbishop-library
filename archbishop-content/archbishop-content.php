@@ -3,7 +3,7 @@
  * Plugin Name: Archbishop Content
  * Plugin URI:  https://archbishopokeke.com
  * Description: Displays pastoral letters, homilies, and writings from the Archbishop Library CMS via shortcodes.
- * Version:     1.0.0
+ * Version:     2.0.0
  * Author:      Archbishop Library CMS
  * License:     GPL-2.0-or-later
  */
@@ -12,12 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-/* ══════════════════════════════════════════════
-   Constants
-   ══════════════════════════════════════════════ */
-
-define( 'ABCONTENT_VERSION', '1.0.0' );
-define( 'ABCONTENT_CACHE_TTL', 300 ); // 5 minutes
+define( 'ABCONTENT_VERSION', '2.0.0' );
+define( 'ABCONTENT_CACHE_TTL', 300 );
 
 /* ══════════════════════════════════════════════
    Settings page
@@ -67,13 +63,10 @@ function abcontent_settings_page() {
             </table>
             <?php submit_button( 'Save Settings' ); ?>
         </form>
-
         <hr>
         <h2>Shortcodes</h2>
         <table class="widefat" style="max-width:600px;">
-            <thead>
-                <tr><th>Shortcode</th><th>Description</th></tr>
-            </thead>
+            <thead><tr><th>Shortcode</th><th>Description</th></tr></thead>
             <tbody>
                 <tr><td><code>[archbishop_pastoral_letters]</code></td><td>Displays all pastoral letters</td></tr>
                 <tr><td><code>[archbishop_homilies]</code></td><td>Displays all homilies</td></tr>
@@ -85,7 +78,7 @@ function abcontent_settings_page() {
 }
 
 /* ══════════════════════════════════════════════
-   API helper — fetch with transient caching
+   API helper
    ══════════════════════════════════════════════ */
 
 function abcontent_fetch( $endpoint ) {
@@ -96,7 +89,6 @@ function abcontent_fetch( $endpoint ) {
 
     $cache_key = 'abcontent_' . md5( $endpoint );
     $cached    = get_transient( $cache_key );
-
     if ( false !== $cached ) {
         return $cached;
     }
@@ -116,18 +108,16 @@ function abcontent_fetch( $endpoint ) {
     }
 
     $body = json_decode( wp_remote_retrieve_body( $response ), true );
-
     if ( empty( $body ) || empty( $body['success'] ) ) {
         return new WP_Error( 'api_invalid', 'Archbishop Content: Invalid API response.' );
     }
 
     set_transient( $cache_key, $body['data'], ABCONTENT_CACHE_TTL );
-
     return $body['data'];
 }
 
 /* ══════════════════════════════════════════════
-   Error notice renderer
+   Helpers
    ══════════════════════════════════════════════ */
 
 function abcontent_error_notice( $error ) {
@@ -138,43 +128,60 @@ function abcontent_error_notice( $error ) {
            ' <br><small>Please check back shortly.</small></div>';
 }
 
-/* ══════════════════════════════════════════════
-   Render the "back" button
-   ══════════════════════════════════════════════ */
+function abcontent_download_url( $url ) {
+    if ( empty( $url ) ) return '';
+    if ( strpos( $url, 'cloudinary.com' ) !== false || strpos( $url, 'res.cloudinary' ) !== false ) {
+        return str_replace( '/upload/', '/upload/fl_attachment/', $url );
+    }
+    return $url;
+}
+
+function abcontent_base_url() {
+    $api_url = rtrim( get_option( 'abcontent_api_url', '' ), '/' );
+    /* Strip /api from end to get the base domain */
+    return preg_replace( '#/api$#', '', $api_url );
+}
 
 function abcontent_back_button( $settings ) {
     if ( empty( $settings['back_button_label'] ) || empty( $settings['back_button_url'] ) ) {
         return '';
     }
 
-    /* Visibility check */
     $vis  = isset( $settings['back_button_visibility'] ) ? $settings['back_button_visibility'] : 'both';
     $host = isset( $_SERVER['HTTP_HOST'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : '';
 
-    if ( $vis === 'admissions' && strpos( $host, 'admissions' ) === false ) {
-        return '';
-    }
-    if ( $vis === 'archdiocese' && strpos( $host, 'admissions' ) !== false ) {
-        return '';
-    }
+    if ( $vis === 'admissions' && strpos( $host, 'admissions' ) === false ) return '';
+    if ( $vis === 'archdiocese' && strpos( $host, 'admissions' ) !== false ) return '';
 
     $color = ! empty( $settings['back_button_color'] ) ? $settings['back_button_color'] : '#c9a84c';
     $font  = ! empty( $settings['body_font'] ) ? $settings['body_font'] : 'Lora';
 
     return '<div style="margin:12px 0;">
         <a href="' . esc_url( $settings['back_button_url'] ) . '"
-           style="display:inline-block;padding:10px 22px;background:' . esc_attr( $color ) . ';
-                  color:#fff;text-decoration:none;border-radius:6px;font-size:14px;
-                  font-family:\'' . esc_attr( $font ) . '\',serif;font-weight:600;
-                  transition:opacity 0.2s;"
-           onmouseover="this.style.opacity=\'0.85\'" onmouseout="this.style.opacity=\'1\'">
+           style="display:inline-block;padding:calc(.667em + 2px) calc(1.333em + 2px);background:' . esc_attr( $color ) . ';
+                  color:#fff;text-decoration:none;border-radius:9999px;font-size:13px;
+                  font-family:\'Cinzel\',serif;font-weight:600;letter-spacing:1px;text-transform:uppercase;
+                  transition:all 0.3s ease;"
+           onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 6px 20px rgba(201,168,76,0.4)\'"
+           onmouseout="this.style.transform=\'none\';this.style.boxShadow=\'none\'">
            ' . esc_html( $settings['back_button_label'] ) . '
         </a>
     </div>';
 }
 
+function abcontent_tone_color( $tone ) {
+    $colors = array(
+        'Reflective'    => '#6c5ce7',
+        'Instructional' => '#0984e3',
+        'Celebratory'   => '#00b894',
+        'Pastoral'      => '#1a3c6e',
+        'Urgent'        => '#d63031',
+    );
+    return isset( $colors[ $tone ] ) ? $colors[ $tone ] : '#1a3c6e';
+}
+
 /* ══════════════════════════════════════════════
-   Scoped style block generator
+   Scoped style block
    ══════════════════════════════════════════════ */
 
 function abcontent_style_block( $cls, $s ) {
@@ -187,26 +194,45 @@ function abcontent_style_block( $cls, $s ) {
     $fsize   = ! empty( $s['font_size'] )        ? $s['font_size']        : '16px';
 
     return "<style>
-    @import url('https://fonts.googleapis.com/css2?family=" . urlencode( $hfont ) . ":wght@400;600;700&family=" . urlencode( $bfont ) . ":wght@400;500;600&display=swap');
-    .{$cls}{font-family:'{$bfont}',serif;font-size:{$fsize};color:{$text};background:{$bg};padding:20px;border-radius:8px;}
-    .{$cls} h3{font-family:'{$hfont}',serif;color:{$primary};margin:0 0 4px;}
-    .{$cls} .ab-card{background:{$bg};border:1px solid {$primary}22;border-radius:8px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,0.05);transition:transform 0.2s,box-shadow 0.2s;}
-    .{$cls} .ab-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.1);}
-    .{$cls} .ab-thumb{width:100%;height:160px;object-fit:cover;border-radius:6px;margin-bottom:12px;background:{$primary}10;}
-    .{$cls} .ab-date{font-size:13px;color:{$text}99;margin-bottom:6px;}
-    .{$cls} .ab-desc{font-size:14px;line-height:1.6;margin-bottom:10px;}
-    .{$cls} .ab-btn{display:inline-block;padding:8px 18px;background:{$accent};color:#fff;text-decoration:none;border-radius:6px;font-size:13px;font-weight:600;transition:opacity 0.2s;}
-    .{$cls} .ab-btn:hover{opacity:0.85;}
-    .{$cls} .ab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;}
-    .{$cls} .ab-list .ab-item{padding:16px 0;border-bottom:1px solid {$text}15;}
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+    .{$cls}{font-family:'Lora',serif;font-size:{$fsize};color:{$text};background:{$bg};padding:24px;border-radius:12px;-webkit-font-smoothing:antialiased;}
+    .{$cls} h3{font-family:'Cinzel',serif;color:{$primary};margin:0 0 8px;font-weight:600;letter-spacing:0.3px;}
+    .{$cls} .ab-card{background:{$bg};border:none;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06);transition:transform 0.3s ease,box-shadow 0.3s ease;}
+    .{$cls} .ab-card:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(0,0,0,0.12);}
+    .{$cls} .ab-cover{width:100%;height:220px;object-fit:cover;display:block;}
+    .{$cls} .ab-cover-placeholder{width:100%;height:220px;background:linear-gradient(135deg,#0a1c33,{$primary});display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.15);font-size:48px;}
+    .{$cls} .ab-card-body{padding:20px 22px;}
+    .{$cls} .ab-badges{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+    .{$cls} .ab-badge{display:inline-block;padding:4px 12px;border-radius:9999px;font-family:'Cinzel',serif;font-size:10px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;}
+    .{$cls} .ab-badge-tone{color:#fff;}
+    .{$cls} .ab-badge-time{background:{$primary}10;color:{$primary};}
+    .{$cls} .ab-date{font-size:13px;color:{$text}88;margin-bottom:10px;}
+    .{$cls} .ab-desc{font-size:14px;line-height:1.7;margin-bottom:14px;color:{$text}bb;}
+    .{$cls} .ab-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
+    .{$cls} .ab-btn{display:inline-block;padding:calc(.5em + 2px) calc(1.2em + 2px);border-radius:9999px;font-family:'Cinzel',serif;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;text-decoration:none;transition:all 0.3s ease;}
+    .{$cls} .ab-btn:hover{transform:translateY(-2px);}
+    .{$cls} .ab-btn-primary{background:{$accent};color:#fff;box-shadow:0 4px 14px rgba(201,168,76,0.25);}
+    .{$cls} .ab-btn-primary:hover{box-shadow:0 6px 20px rgba(201,168,76,0.4);}
+    .{$cls} .ab-btn-outline{background:transparent;color:{$primary};border:1.5px solid {$primary}30;}
+    .{$cls} .ab-btn-outline:hover{border-color:{$primary};background:{$primary}06;}
+    .{$cls} .ab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;}
+    .{$cls} .ab-list .ab-item{display:flex;gap:24px;padding:24px 0;border-bottom:1px solid {$text}08;align-items:flex-start;}
     .{$cls} .ab-list .ab-item:last-child{border-bottom:none;}
-    .{$cls} .ab-magazine-featured{background:{$primary}08;border-radius:8px;padding:24px;margin-bottom:20px;}
-    .{$cls} .ab-magazine-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;}
-    .{$cls} table.ab-table{width:100%;border-collapse:collapse;}
-    .{$cls} table.ab-table th{background:{$primary};color:#fff;padding:12px 16px;text-align:left;font-family:'{$hfont}',serif;font-size:14px;}
-    .{$cls} table.ab-table td{padding:12px 16px;border-bottom:1px solid {$text}10;font-size:14px;}
-    .{$cls} table.ab-table tr:nth-child(even) td{background:{$primary}05;}
-    .{$cls} table.ab-table tr:hover td{background:{$accent}10;}
+    .{$cls} .ab-list .ab-item-thumb{width:180px;height:130px;border-radius:10px;object-fit:cover;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,0.08);}
+    .{$cls} .ab-list .ab-item-body{flex:1;min-width:0;}
+    .{$cls} .ab-magazine-featured{position:relative;border-radius:16px;overflow:hidden;margin-bottom:28px;min-height:340px;display:flex;align-items:flex-end;}
+    .{$cls} .ab-magazine-featured .ab-feat-bg{position:absolute;inset:0;background-size:cover;background-position:center;}
+    .{$cls} .ab-magazine-featured .ab-feat-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,28,51,0.92) 0%,rgba(10,28,51,0.4) 50%,transparent 100%);}
+    .{$cls} .ab-magazine-featured .ab-feat-content{position:relative;z-index:2;padding:36px;color:#fff;width:100%;}
+    .{$cls} .ab-magazine-featured h3{color:#fff;font-size:24px;font-family:'Cinzel Decorative',serif;font-weight:400;}
+    .{$cls} .ab-magazine-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px;}
+    .{$cls} table.ab-table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden;}
+    .{$cls} table.ab-table th{background:linear-gradient(135deg,#0a1c33,{$primary});color:#fff;padding:14px 18px;text-align:left;font-family:'Cinzel',serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;}
+    .{$cls} table.ab-table td{padding:14px 18px;border-bottom:1px solid {$text}08;font-size:14px;vertical-align:middle;}
+    .{$cls} table.ab-table tr:nth-child(even) td{background:{$primary}03;}
+    .{$cls} table.ab-table tr:hover td{background:rgba(201,168,76,0.06);}
+    .{$cls} table.ab-table .ab-table-thumb{width:64px;height:48px;border-radius:6px;object-fit:cover;box-shadow:0 2px 6px rgba(0,0,0,0.08);}
+    .{$cls} .ab-star{color:{$accent};font-size:12px;}
     </style>";
 }
 
@@ -214,117 +240,141 @@ function abcontent_style_block( $cls, $s ) {
    Layout renderers
    ══════════════════════════════════════════════ */
 
-function abcontent_render_grid( $items, $type ) {
-    $html = '<div class="ab-grid">';
-    foreach ( $items as $item ) {
-        $thumb = '';
-        if ( ! empty( $item['thumbnail_url'] ) ) {
-            $thumb = '<img class="ab-thumb" src="' . esc_url( $item['thumbnail_url'] ) . '" alt="' . esc_attr( $item['title'] ) . '">';
-        } else {
-            $thumb = '<div class="ab-thumb"></div>';
-        }
-
-        $desc = '';
-        if ( $type === 'writings' && ! empty( $item['body'] ) ) {
-            $desc = '<p class="ab-desc">' . esc_html( wp_trim_words( $item['body'], 25 ) ) . '</p>';
-        } elseif ( ! empty( $item['description'] ) ) {
-            $desc = '<p class="ab-desc">' . esc_html( wp_trim_words( $item['description'], 25 ) ) . '</p>';
-        }
-
-        $action = '';
-        if ( ! empty( $item['pdf_url'] ) ) {
-            $action = '<a class="ab-btn" href="' . esc_url( $item['pdf_url'] ) . '" target="_blank">Download PDF</a>';
-        } elseif ( $type === 'writings' ) {
-            $action = '<a class="ab-btn" href="#" onclick="return false;">Read More</a>';
-        }
-
-        $html .= '<div class="ab-card">';
-        $html .= $thumb;
-        $html .= '<h3>' . esc_html( $item['title'] ) . '</h3>';
-        $html .= '<p class="ab-date">' . esc_html( $item['date'] ?? '' ) . '</p>';
-        $html .= $desc;
-        $html .= $action;
-        $html .= '</div>';
+function abcontent_card_badges( $item ) {
+    $html = '<div class="ab-badges">';
+    if ( ! empty( $item['tone'] ) ) {
+        $tc = abcontent_tone_color( $item['tone'] );
+        $html .= '<span class="ab-badge ab-badge-tone" style="background:' . esc_attr( $tc ) . ';">' . esc_html( $item['tone'] ) . '</span>';
+    }
+    if ( ! empty( $item['reading_time'] ) ) {
+        $html .= '<span class="ab-badge ab-badge-time">' . esc_html( $item['reading_time'] ) . '</span>';
     }
     $html .= '</div>';
     return $html;
 }
+
+function abcontent_card_cover( $item, $class = 'ab-cover' ) {
+    $cover = ! empty( $item['cover_photo_url'] ) ? $item['cover_photo_url'] : ( ! empty( $item['thumbnail_url'] ) ? $item['thumbnail_url'] : '' );
+    if ( $cover ) {
+        return '<img class="' . $class . '" src="' . esc_url( $cover ) . '" alt="' . esc_attr( $item['title'] ) . '" loading="lazy">';
+    }
+    return '<div class="ab-cover-placeholder">✝</div>';
+}
+
+function abcontent_card_actions( $item, $type ) {
+    $base   = abcontent_base_url();
+    $paths  = array( 'pastoral_letters' => 'letter', 'homilies' => 'homily', 'writings' => 'writing' );
+    $path   = isset( $paths[ $type ] ) ? $paths[ $type ] : 'letter';
+    $html   = '<div class="ab-actions">';
+    $html  .= '<a class="ab-btn ab-btn-primary" href="' . esc_url( $base . '/' . $path . '/' . $item['id'] ) . '" target="_blank">Read Full</a>';
+    if ( ! empty( $item['pdf_url'] ) ) {
+        $html .= '<a class="ab-btn ab-btn-outline" href="' . esc_url( abcontent_download_url( $item['pdf_url'] ) ) . '" download target="_blank">Download PDF</a>';
+    }
+    $html .= '</div>';
+    return $html;
+}
+
+function abcontent_excerpt( $item, $type, $len = 120 ) {
+    $text = '';
+    if ( $type === 'writings' && ! empty( $item['body'] ) ) {
+        $text = $item['body'];
+    } elseif ( ! empty( $item['description'] ) ) {
+        $text = $item['description'];
+    }
+    if ( ! $text ) return '';
+    $excerpt = mb_strlen( $text ) > $len ? mb_substr( $text, 0, $len ) . '...' : $text;
+    return '<p class="ab-desc">' . esc_html( $excerpt ) . '</p>';
+}
+
+/* ── Grid View ────────────────────────────── */
+
+function abcontent_render_grid( $items, $type ) {
+    $html = '<div class="ab-grid">';
+    foreach ( $items as $item ) {
+        $html .= '<div class="ab-card">';
+        $html .= abcontent_card_cover( $item );
+        $html .= '<div class="ab-card-body">';
+        $html .= abcontent_card_badges( $item );
+        $html .= '<h3>' . esc_html( $item['title'] ) . '</h3>';
+        $html .= abcontent_excerpt( $item, $type );
+        $html .= '<p class="ab-date">' . esc_html( $item['date'] ?? '' ) . '</p>';
+        $html .= abcontent_card_actions( $item, $type );
+        $html .= '</div></div>';
+    }
+    $html .= '</div>';
+    return $html;
+}
+
+/* ── List View ────────────────────────────── */
 
 function abcontent_render_list( $items, $type ) {
     $html = '<div class="ab-list">';
     foreach ( $items as $item ) {
-        $desc = '';
-        if ( $type === 'writings' && ! empty( $item['body'] ) ) {
-            $desc = '<p class="ab-desc">' . esc_html( wp_trim_words( $item['body'], 30 ) ) . '</p>';
-        } elseif ( ! empty( $item['description'] ) ) {
-            $desc = '<p class="ab-desc">' . esc_html( wp_trim_words( $item['description'], 30 ) ) . '</p>';
-        }
-
-        $action = '';
-        if ( ! empty( $item['pdf_url'] ) ) {
-            $action = ' <a class="ab-btn" href="' . esc_url( $item['pdf_url'] ) . '" target="_blank">Download PDF</a>';
-        }
+        $cover = ! empty( $item['cover_photo_url'] ) ? $item['cover_photo_url'] : ( ! empty( $item['thumbnail_url'] ) ? $item['thumbnail_url'] : '' );
 
         $html .= '<div class="ab-item">';
+        if ( $cover ) {
+            $html .= '<img class="ab-item-thumb" src="' . esc_url( $cover ) . '" alt="' . esc_attr( $item['title'] ) . '" loading="lazy">';
+        }
+        $html .= '<div class="ab-item-body">';
         $html .= '<h3>' . esc_html( $item['title'] ) . '</h3>';
-        $html .= '<p class="ab-date">' . esc_html( $item['date'] ?? '' );
+        $html .= abcontent_excerpt( $item, $type, 200 );
+        $html .= '<div class="ab-badges" style="margin-bottom:8px;">';
+        $html .= '<span class="ab-badge ab-badge-time" style="font-size:11px;">' . esc_html( $item['date'] ?? '' ) . '</span>';
+        if ( ! empty( $item['tone'] ) ) {
+            $tc = abcontent_tone_color( $item['tone'] );
+            $html .= ' <span class="ab-badge ab-badge-tone" style="background:' . esc_attr( $tc ) . ';">' . esc_html( $item['tone'] ) . '</span>';
+        }
+        if ( ! empty( $item['reading_time'] ) ) {
+            $html .= ' <span class="ab-badge ab-badge-time">' . esc_html( $item['reading_time'] ) . '</span>';
+        }
         if ( ! empty( $item['occasion'] ) ) {
-            $html .= ' &middot; ' . esc_html( $item['occasion'] );
+            $html .= ' <span class="ab-badge ab-badge-time">' . esc_html( $item['occasion'] ) . '</span>';
         }
         if ( ! empty( $item['category'] ) ) {
-            $html .= ' &middot; ' . esc_html( $item['category'] );
+            $html .= ' <span class="ab-badge ab-badge-time">' . esc_html( $item['category'] ) . '</span>';
         }
-        $html .= '</p>';
-        $html .= $desc;
-        $html .= $action;
         $html .= '</div>';
+        $html .= abcontent_card_actions( $item, $type );
+        $html .= '</div></div>';
     }
     $html .= '</div>';
     return $html;
 }
 
+/* ── Magazine View ────────────────────────── */
+
 function abcontent_render_magazine( $items, $type ) {
-    if ( empty( $items ) ) {
-        return '<p>No content available.</p>';
-    }
+    if ( empty( $items ) ) return '<p>No content available.</p>';
 
     $featured = array_shift( $items );
-    $html = '';
+    $cover = ! empty( $featured['cover_photo_url'] ) ? $featured['cover_photo_url'] : ( ! empty( $featured['thumbnail_url'] ) ? $featured['thumbnail_url'] : '' );
 
-    /* Featured item */
-    $html .= '<div class="ab-magazine-featured">';
-    if ( ! empty( $featured['thumbnail_url'] ) ) {
-        $html .= '<img class="ab-thumb" src="' . esc_url( $featured['thumbnail_url'] ) . '" alt="' . esc_attr( $featured['title'] ) . '" style="height:220px;">';
+    $html = '<div class="ab-magazine-featured">';
+    if ( $cover ) {
+        $html .= '<div class="ab-feat-bg" style="background-image:url(\'' . esc_url( $cover ) . '\');"></div>';
+    } else {
+        $html .= '<div class="ab-feat-bg" style="background:linear-gradient(135deg,#1a3c6e,#2a5298);"></div>';
     }
-    $html .= '<h3 style="font-size:22px;">' . esc_html( $featured['title'] ) . '</h3>';
-    $html .= '<p class="ab-date">' . esc_html( $featured['date'] ?? '' ) . '</p>';
+    $html .= '<div class="ab-feat-overlay"></div>';
+    $html .= '<div class="ab-feat-content">';
+    $html .= abcontent_card_badges( $featured );
+    $html .= '<h3>' . esc_html( $featured['title'] ) . '</h3>';
+    $html .= '<p class="ab-desc" style="color:rgba(255,255,255,0.85);">' . esc_html( mb_substr( $featured['description'] ?? $featured['body'] ?? '', 0, 180 ) ) . '</p>';
+    $html .= abcontent_card_actions( $featured, $type );
+    $html .= '</div></div>';
 
-    $desc = '';
-    if ( $type === 'writings' && ! empty( $featured['body'] ) ) {
-        $desc = esc_html( wp_trim_words( $featured['body'], 50 ) );
-    } elseif ( ! empty( $featured['description'] ) ) {
-        $desc = esc_html( wp_trim_words( $featured['description'], 50 ) );
-    }
-    if ( $desc ) {
-        $html .= '<p class="ab-desc">' . $desc . '</p>';
-    }
-
-    if ( ! empty( $featured['pdf_url'] ) ) {
-        $html .= '<a class="ab-btn" href="' . esc_url( $featured['pdf_url'] ) . '" target="_blank">Download PDF</a>';
-    }
-    $html .= '</div>';
-
-    /* Remaining items in grid */
     if ( ! empty( $items ) ) {
         $html .= '<div class="ab-magazine-grid">';
         foreach ( $items as $item ) {
             $html .= '<div class="ab-card">';
+            $html .= abcontent_card_cover( $item );
+            $html .= '<div class="ab-card-body">';
+            $html .= abcontent_card_badges( $item );
             $html .= '<h3>' . esc_html( $item['title'] ) . '</h3>';
             $html .= '<p class="ab-date">' . esc_html( $item['date'] ?? '' ) . '</p>';
-            if ( ! empty( $item['pdf_url'] ) ) {
-                $html .= '<a class="ab-btn" href="' . esc_url( $item['pdf_url'] ) . '" target="_blank" style="margin-top:8px;">Download</a>';
-            }
-            $html .= '</div>';
+            $html .= abcontent_card_actions( $item, $type );
+            $html .= '</div></div>';
         }
         $html .= '</div>';
     }
@@ -332,48 +382,46 @@ function abcontent_render_magazine( $items, $type ) {
     return $html;
 }
 
+/* ── Table View ───────────────────────────── */
+
 function abcontent_render_table( $items, $type ) {
-    $html = '<table class="ab-table">';
-    $html .= '<thead><tr>';
-    $html .= '<th>Title</th><th>Date</th>';
-    if ( $type === 'homilies' ) {
-        $html .= '<th>Occasion</th>';
-    }
-    if ( $type === 'writings' ) {
-        $html .= '<th>Category</th>';
-    }
-    $html .= '<th>Description</th>';
-    if ( $type !== 'writings' ) {
-        $html .= '<th>Download</th>';
-    }
+    $html = '<table class="ab-table"><thead><tr>';
+    $html .= '<th>Cover</th><th>Title</th><th>Date</th>';
+    if ( $type === 'homilies' ) $html .= '<th>Occasion</th>';
+    if ( $type === 'writings' ) $html .= '<th>Category</th>';
+    $html .= '<th>Reading Time</th><th>Tone</th><th>Read</th><th>Download</th>';
     $html .= '</tr></thead><tbody>';
 
+    $base  = abcontent_base_url();
+    $paths = array( 'pastoral_letters' => 'letter', 'homilies' => 'homily', 'writings' => 'writing' );
+    $path  = isset( $paths[ $type ] ) ? $paths[ $type ] : 'letter';
+
     foreach ( $items as $item ) {
+        $cover = ! empty( $item['cover_photo_url'] ) ? $item['cover_photo_url'] : ( ! empty( $item['thumbnail_url'] ) ? $item['thumbnail_url'] : '' );
+
         $html .= '<tr>';
+        $html .= '<td>' . ( $cover ? '<img class="ab-table-thumb" src="' . esc_url( $cover ) . '" alt="">' : '—' ) . '</td>';
         $html .= '<td><strong>' . esc_html( $item['title'] ) . '</strong></td>';
         $html .= '<td>' . esc_html( $item['date'] ?? '—' ) . '</td>';
 
-        if ( $type === 'homilies' ) {
-            $html .= '<td>' . esc_html( $item['occasion'] ?? '—' ) . '</td>';
-        }
-        if ( $type === 'writings' ) {
-            $html .= '<td>' . esc_html( $item['category'] ?? '—' ) . '</td>';
+        if ( $type === 'homilies' ) $html .= '<td>' . esc_html( $item['occasion'] ?? '—' ) . '</td>';
+        if ( $type === 'writings' ) $html .= '<td>' . esc_html( $item['category'] ?? '—' ) . '</td>';
+
+        $html .= '<td>' . esc_html( $item['reading_time'] ?? '—' ) . '</td>';
+
+        if ( ! empty( $item['tone'] ) ) {
+            $tc = abcontent_tone_color( $item['tone'] );
+            $html .= '<td><span style="display:inline-block;padding:2px 10px;border-radius:10px;background:' . esc_attr( $tc ) . ';color:#fff;font-size:11px;font-weight:600;">' . esc_html( $item['tone'] ) . '</span></td>';
+        } else {
+            $html .= '<td>—</td>';
         }
 
-        $desc = '';
-        if ( $type === 'writings' && ! empty( $item['body'] ) ) {
-            $desc = wp_trim_words( $item['body'], 15 );
-        } elseif ( ! empty( $item['description'] ) ) {
-            $desc = wp_trim_words( $item['description'], 15 );
-        }
-        $html .= '<td>' . esc_html( $desc ?: '—' ) . '</td>';
+        $html .= '<td><a class="ab-btn ab-btn-primary" href="' . esc_url( $base . '/' . $path . '/' . $item['id'] ) . '" target="_blank" style="padding:6px 14px;">Read</a></td>';
 
-        if ( $type !== 'writings' ) {
-            if ( ! empty( $item['pdf_url'] ) ) {
-                $html .= '<td><a class="ab-btn" href="' . esc_url( $item['pdf_url'] ) . '" target="_blank">PDF</a></td>';
-            } else {
-                $html .= '<td>—</td>';
-            }
+        if ( ! empty( $item['pdf_url'] ) ) {
+            $html .= '<td><a class="ab-btn ab-btn-outline" href="' . esc_url( abcontent_download_url( $item['pdf_url'] ) ) . '" download target="_blank" style="padding:6px 14px;">Download</a></td>';
+        } else {
+            $html .= '<td>—</td>';
         }
 
         $html .= '</tr>';
@@ -384,83 +432,55 @@ function abcontent_render_table( $items, $type ) {
 }
 
 /* ══════════════════════════════════════════════
-   Master shortcode renderer
+   Master renderer
    ══════════════════════════════════════════════ */
 
 function abcontent_render_section( $content_endpoint, $settings_section, $type ) {
-    /* Fetch content */
     $items = abcontent_fetch( $content_endpoint );
-    if ( is_wp_error( $items ) ) {
-        return abcontent_error_notice( $items );
-    }
+    if ( is_wp_error( $items ) ) return abcontent_error_notice( $items );
+    if ( empty( $items ) ) return '<p style="text-align:center;padding:30px;color:#999;font-style:italic;">No content available at this time.</p>';
 
-    if ( empty( $items ) ) {
-        return '<p style="text-align:center;padding:30px;color:#999;font-style:italic;">No content available at this time.</p>';
-    }
-
-    /* Fetch settings */
     $settings = abcontent_fetch( '/settings/' . $settings_section );
-    if ( is_wp_error( $settings ) ) {
-        $settings = array(); // fall back to defaults
-    }
+    if ( is_wp_error( $settings ) ) $settings = array();
 
     $layout = ! empty( $settings['layout'] ) ? $settings['layout'] : 'grid';
     $cls    = 'ab-' . wp_generate_password( 8, false );
 
-    /* Build output */
     $output = abcontent_style_block( $cls, $settings );
     $output .= '<div class="' . esc_attr( $cls ) . '">';
 
-    /* Top back button */
     $pos = ! empty( $settings['back_button_position'] ) ? $settings['back_button_position'] : 'both';
     if ( $pos === 'top' || $pos === 'both' ) {
         $output .= abcontent_back_button( $settings );
     }
 
-    /* Render layout */
     switch ( $layout ) {
-        case 'list':
-            $output .= abcontent_render_list( $items, $type );
-            break;
-        case 'magazine':
-            $output .= abcontent_render_magazine( $items, $type );
-            break;
-        case 'table':
-            $output .= abcontent_render_table( $items, $type );
-            break;
-        default:
-            $output .= abcontent_render_grid( $items, $type );
-            break;
+        case 'list':     $output .= abcontent_render_list( $items, $type ); break;
+        case 'magazine': $output .= abcontent_render_magazine( $items, $type ); break;
+        case 'table':    $output .= abcontent_render_table( $items, $type ); break;
+        default:         $output .= abcontent_render_grid( $items, $type ); break;
     }
 
-    /* Bottom back button */
     if ( $pos === 'bottom' || $pos === 'both' ) {
         $output .= abcontent_back_button( $settings );
     }
 
     $output .= '</div>';
-
     return $output;
 }
 
 /* ══════════════════════════════════════════════
-   Shortcode registrations
+   Shortcodes
    ══════════════════════════════════════════════ */
 
-add_shortcode( 'archbishop_pastoral_letters', 'abcontent_pastoral_letters_shortcode' );
-
-function abcontent_pastoral_letters_shortcode() {
+add_shortcode( 'archbishop_pastoral_letters', function() {
     return abcontent_render_section( '/pastoral-letters', 'pastoral_letters', 'pastoral_letters' );
-}
+});
 
-add_shortcode( 'archbishop_homilies', 'abcontent_homilies_shortcode' );
-
-function abcontent_homilies_shortcode() {
+add_shortcode( 'archbishop_homilies', function() {
     return abcontent_render_section( '/homilies', 'homilies', 'homilies' );
-}
+});
 
-add_shortcode( 'archbishop_writings', 'abcontent_writings_shortcode' );
-
-function abcontent_writings_shortcode() {
+add_shortcode( 'archbishop_writings', function() {
     return abcontent_render_section( '/writings', 'writings', 'writings' );
-}
+});

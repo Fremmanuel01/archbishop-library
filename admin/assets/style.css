@@ -4,6 +4,53 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ── Accessibility: Skip to Content ──────── */
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--navy, #1a3c6e);
+  color: #fff;
+  padding: 8px 16px;
+  z-index: 1000;
+  font-size: 14px;
+  transition: top 0.2s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ── Accessibility: Focus States ─────────── */
+
+:focus-visible {
+  outline: 3px solid #c9a84c;
+  outline-offset: 2px;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: #c9a84c;
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.2);
+}
+
+/* ── Accessibility: Cursor & Motion ──────── */
+
+button, a, [role="button"], .layout-option, .drop-zone, .tab-bar button, .copy-btn {
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 :root {
   --navy: #1a3c6e;
   --navy-dark: #0f2847;
@@ -901,6 +948,100 @@ body {
 .preview-body {
   padding: 20px;
   min-height: 400px;
+}
+
+/* ── Drop Zones ───────────────────────────── */
+
+.drop-zone {
+  border: 2px dashed var(--grey);
+  border-radius: var(--radius);
+  padding: 28px;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  background: var(--grey-lightest);
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.drop-zone:hover,
+.drop-zone.drag-over {
+  border-color: var(--gold);
+  background: var(--gold-pale);
+}
+
+.drop-zone-prompt {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.drop-preview {
+  max-width: 100%;
+  max-height: 160px;
+  border-radius: 6px;
+  object-fit: contain;
+}
+
+.drop-preview-file {
+  font-size: 14px;
+  color: var(--navy);
+  font-weight: 600;
+}
+
+/* ── Auto-cover Notice ────────────────────── */
+
+.auto-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #f9f5ef;
+  border: 1px solid #e8dcc8;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #8b6914;
+  line-height: 1.4;
+}
+
+.auto-notice .notice-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* ── AI Badge ─────────────────────────────── */
+
+.ai-badge {
+  display: inline-block;
+  padding: 1px 7px;
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+
+/* ── AI Spinner ───────────────────────────── */
+
+.ai-spinner {
+  width: 56px;
+  height: 56px;
+  border: 4px solid var(--grey);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ── Hidden sections ──────────────────────── */

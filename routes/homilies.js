@@ -2,13 +2,12 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const pdfParse = require('pdf-parse');
+const fs = require('fs');
 const db = require('../database');
 const authenticateToken = require('../middleware/auth');
-
-/* ──────────────────────────────────────────────
-   Cloudinary config
-   ────────────────────────────────────────────── */
+const { processDocument } = require('../services/aiProcessor');
+const { generateCover } = require('../services/coverGenerator');
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -16,47 +15,47 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-/* ──────────────────────────────────────────────
-   Multer + Cloudinary storage
-   ────────────────────────────────────────────── */
-
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'archbishop-library/homilies',
-    allowed_formats: ['pdf', 'jpg', 'jpeg', 'png'],
-    resource_type: 'auto'
-  }
+const tempStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, require('os').tmpdir()),
+  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
 });
 
 const upload = multer({
-  storage,
-  limits: { fileSize: 10 * 1024 * 1024 },
+  storage: tempStorage,
+  limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const allowed = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
-    if (allowed.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only PDF, JPG, and PNG files are allowed.'));
+    if (file.fieldname === 'pdf_file') {
+      if (file.mimetype !== 'application/pdf') {
+        return cb(new Error('Only PDF files are allowed.'));
+      }
     }
+    cb(null, true);
   }
 });
 
 const uploadFields = upload.fields([
-  { name: 'pdf', maxCount: 1 },
-  { name: 'thumbnail', maxCount: 1 }
+  { name: 'pdf_file', maxCount: 1 }
 ]);
 
-/* ──────────────────────────────────────────────
-   PUBLIC — Get all homilies
-   ────────────────────────────────────────────── */
+async function uploadToCloudinary(filePath, folder, resourceType) {
+  const result = await cloudinary.uploader.upload(filePath, {
+    folder: 'archbishop-library/' + folder,
+    resource_type: resourceType || 'auto'
+  });
+  return result.secure_url;
+}
+
+function cleanTemp(filePath) {
+  try { fs.unlinkSync(filePath); } catch (e) { /* ignore */ }
+}
+
+/* ── PUBLIC — Get all homilies ──────────────── */
 
 router.get('/', (req, res) => {
   try {
     const homilies = db.prepare(
-      'SELECT * FROM homilies ORDER BY date DESC, created_at DESC'
+      'SELECT * FROM homilies ORDER BY occasion ASC, date DESC'
     ).all();
-
     res.json({ success: true, data: homilies });
   } catch (err) {
     console.error('Error fetching homilies:', err);
@@ -64,18 +63,14 @@ router.get('/', (req, res) => {
   }
 });
 
-/* ──────────────────────────────────────────────
-   PUBLIC — Get single homily
-   ────────────────────────────────────────────── */
+/* ── PUBLIC — Get single homily ─────────────── */
 
 router.get('/:id', (req, res) => {
   try {
     const homily = db.prepare('SELECT * FROM homilies WHERE id = ?').get(req.params.id);
-
     if (!homily) {
       return res.status(404).json({ success: false, message: 'Homily not found.' });
     }
-
     res.json({ success: true, data: homily });
   } catch (err) {
     console.error('Error fetching homily:', err);
@@ -83,116 +78,156 @@ router.get('/:id', (req, res) => {
   }
 });
 
-/* ──────────────────────────────────────────────
-   PROTECTED — Create homily
-   ────────────────────────────────────────────── */
+/* ── PROTECTED — Create homily ──────────────── */
 
 router.post('/', authenticateToken, (req, res) => {
-  uploadFields(req, res, (uploadErr) => {
+  uploadFields(req, res, async (uploadErr) => {
     if (uploadErr) {
       if (uploadErr.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({ success: false, message: 'File size exceeds 10 MB limit.' });
+        return res.status(400).json({ success: false, message: 'File size exceeds limit.' });
       }
       return res.status(400).json({ success: false, message: uploadErr.message });
     }
+
+    const pdfFile = req.files && req.files.pdf_file ? req.files.pdf_file[0] : null;
 
     try {
       const { title, description, occasion, date } = req.body;
 
       if (!title) {
+        if (pdfFile) cleanTemp(pdfFile.path);
         return res.status(400).json({ success: false, message: 'Title is required.' });
       }
 
-      const pdfUrl = req.files && req.files.pdf ? req.files.pdf[0].path : null;
-      const thumbnailUrl = req.files && req.files.thumbnail ? req.files.thumbnail[0].path : null;
+      let pdfUrl = null;
+
+      if (pdfFile) {
+        pdfUrl = await uploadToCloudinary(pdfFile.path, 'homilies/pdfs', 'raw');
+      }
+
+      /* AI processing */
+      let aiResult = { summary: null, date: null, key_quote: null, tags: [], reading_time: null, tone: null, highlights: [], occasion: null, category: null };
+      let aiProcessed = false;
+
+      if (pdfFile) {
+        try {
+          const pdfBuffer = fs.readFileSync(pdfFile.path);
+          const pdfData = await pdfParse(pdfBuffer);
+          if (pdfData.text && pdfData.text.trim().length > 50) {
+            aiResult = await processDocument(pdfData.text, 'homily');
+            aiProcessed = !!(aiResult.summary || aiResult.key_quote);
+          }
+        } catch (pdfErr) {
+          console.error('PDF extraction error:', pdfErr.message);
+        }
+        cleanTemp(pdfFile.path);
+      }
+
+      const finalDate = date || aiResult.date || null;
+      const finalDescription = description || aiResult.summary || null;
+      const finalOccasion = occasion || aiResult.occasion || null;
 
       const stmt = db.prepare(`
-        INSERT INTO homilies (title, description, pdf_url, thumbnail_url, occasion, date)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO homilies
+          (title, description, pdf_url, thumbnail_url, cover_photo_url, occasion, date,
+           key_quote, tags, reading_time, tone, highlights)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
       const result = stmt.run(
-        title,
-        description || null,
-        pdfUrl,
-        thumbnailUrl,
-        occasion || null,
-        date || null
+        title, finalDescription, pdfUrl, null, null,
+        finalOccasion, finalDate,
+        aiResult.key_quote,
+        JSON.stringify(aiResult.tags),
+        aiResult.reading_time,
+        aiResult.tone,
+        JSON.stringify(aiResult.highlights)
       );
 
-      const created = db.prepare('SELECT * FROM homilies WHERE id = ?').get(result.lastInsertRowid);
+      /* Auto-generate branded cover (non-blocking) */
+      const recordId = result.lastInsertRowid;
+      generateCover(title, finalDate, 'homily').then(coverUrl => {
+        if (coverUrl) {
+          db.prepare('UPDATE homilies SET cover_photo_url = ?, thumbnail_url = ? WHERE id = ?')
+            .run(coverUrl, coverUrl, recordId);
+        }
+      }).catch(e => console.error('Cover generation error:', e.message));
 
-      res.status(201).json({ success: true, data: created });
+      const created = db.prepare('SELECT * FROM homilies WHERE id = ?').get(recordId);
+      res.status(201).json({ success: true, data: created, ai_processed: aiProcessed });
     } catch (err) {
+      if (pdfFile) cleanTemp(pdfFile.path);
       console.error('Error creating homily:', err);
       res.status(500).json({ success: false, message: 'Failed to create homily.' });
     }
   });
 });
 
-/* ──────────────────────────────────────────────
-   PROTECTED — Update homily
-   ────────────────────────────────────────────── */
+/* ── PROTECTED — Update homily ──────────────── */
 
 router.put('/:id', authenticateToken, (req, res) => {
-  uploadFields(req, res, (uploadErr) => {
+  uploadFields(req, res, async (uploadErr) => {
     if (uploadErr) {
-      if (uploadErr.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({ success: false, message: 'File size exceeds 10 MB limit.' });
-      }
       return res.status(400).json({ success: false, message: uploadErr.message });
     }
 
+    const pdfFile = req.files && req.files.pdf_file ? req.files.pdf_file[0] : null;
+
     try {
       const existing = db.prepare('SELECT * FROM homilies WHERE id = ?').get(req.params.id);
-
       if (!existing) {
+        if (pdfFile) cleanTemp(pdfFile.path);
         return res.status(404).json({ success: false, message: 'Homily not found.' });
       }
 
-      const { title, description, occasion, date } = req.body;
+      const { title, description, occasion, date, key_quote, tags, reading_time, tone, highlights } = req.body;
 
-      const pdfUrl = req.files && req.files.pdf ? req.files.pdf[0].path : existing.pdf_url;
-      const thumbnailUrl = req.files && req.files.thumbnail ? req.files.thumbnail[0].path : existing.thumbnail_url;
+      let coverPhotoUrl = existing.cover_photo_url;
+      let pdfUrl = existing.pdf_url;
+
+      if (pdfFile) {
+        pdfUrl = await uploadToCloudinary(pdfFile.path, 'homilies/pdfs', 'raw');
+        cleanTemp(pdfFile.path);
+      }
 
       db.prepare(`
-        UPDATE homilies
-        SET title = ?, description = ?, pdf_url = ?, thumbnail_url = ?, occasion = ?, date = ?
+        UPDATE homilies SET
+          title = ?, description = ?, pdf_url = ?, thumbnail_url = ?, cover_photo_url = ?,
+          occasion = ?, date = ?, key_quote = ?, tags = ?, reading_time = ?, tone = ?, highlights = ?
         WHERE id = ?
       `).run(
         title || existing.title,
         description !== undefined ? description : existing.description,
-        pdfUrl,
-        thumbnailUrl,
+        pdfUrl, coverPhotoUrl, coverPhotoUrl,
         occasion !== undefined ? occasion : existing.occasion,
         date || existing.date,
+        key_quote !== undefined ? key_quote : existing.key_quote,
+        tags !== undefined ? (typeof tags === 'string' ? tags : JSON.stringify(tags)) : existing.tags,
+        reading_time !== undefined ? reading_time : existing.reading_time,
+        tone !== undefined ? tone : existing.tone,
+        highlights !== undefined ? (typeof highlights === 'string' ? highlights : JSON.stringify(highlights)) : existing.highlights,
         req.params.id
       );
 
       const updated = db.prepare('SELECT * FROM homilies WHERE id = ?').get(req.params.id);
-
       res.json({ success: true, data: updated });
     } catch (err) {
+      if (pdfFile) cleanTemp(pdfFile.path);
       console.error('Error updating homily:', err);
       res.status(500).json({ success: false, message: 'Failed to update homily.' });
     }
   });
 });
 
-/* ──────────────────────────────────────────────
-   PROTECTED — Delete homily
-   ────────────────────────────────────────────── */
+/* ── PROTECTED — Delete homily ──────────────── */
 
 router.delete('/:id', authenticateToken, (req, res) => {
   try {
     const existing = db.prepare('SELECT * FROM homilies WHERE id = ?').get(req.params.id);
-
     if (!existing) {
       return res.status(404).json({ success: false, message: 'Homily not found.' });
     }
-
     db.prepare('DELETE FROM homilies WHERE id = ?').run(req.params.id);
-
     res.json({ success: true, data: { message: 'Homily deleted successfully.' } });
   } catch (err) {
     console.error('Error deleting homily:', err);

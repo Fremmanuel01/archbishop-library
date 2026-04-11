@@ -149,6 +149,45 @@ app.use('/api/writings', writingsRouter);
 app.use('/api/settings', settingsRouter);
 
 /* ──────────────────────────────────────────────
+   Single Post Pages
+   ────────────────────────────────────────────── */
+
+const { renderSinglePost } = require('./services/singlePostRenderer');
+
+app.get('/letter/:id', (req, res) => {
+  try {
+    const item = db.prepare('SELECT * FROM pastoral_letters WHERE id = ?').get(req.params.id);
+    if (!item) return res.status(404).send('<h1>Not Found</h1>');
+    res.send(renderSinglePost(item, 'pastoral_letters'));
+  } catch (err) {
+    console.error('Error rendering letter:', err);
+    res.status(500).send('<h1>Server Error</h1>');
+  }
+});
+
+app.get('/homily/:id', (req, res) => {
+  try {
+    const item = db.prepare('SELECT * FROM homilies WHERE id = ?').get(req.params.id);
+    if (!item) return res.status(404).send('<h1>Not Found</h1>');
+    res.send(renderSinglePost(item, 'homilies'));
+  } catch (err) {
+    console.error('Error rendering homily:', err);
+    res.status(500).send('<h1>Server Error</h1>');
+  }
+});
+
+app.get('/writing/:id', (req, res) => {
+  try {
+    const item = db.prepare('SELECT * FROM writings WHERE id = ?').get(req.params.id);
+    if (!item) return res.status(404).send('<h1>Not Found</h1>');
+    res.send(renderSinglePost(item, 'writings'));
+  } catch (err) {
+    console.error('Error rendering writing:', err);
+    res.status(500).send('<h1>Server Error</h1>');
+  }
+});
+
+/* ──────────────────────────────────────────────
    Health check
    ────────────────────────────────────────────── */
 
