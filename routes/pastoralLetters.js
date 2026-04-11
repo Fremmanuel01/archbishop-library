@@ -97,6 +97,42 @@ router.get('/', (req, res) => {
 });
 
 /* ──────────────────────────────────────────────
+   PROTECTED — Seed a pastoral letter (JSON body, no file upload)
+   ────────────────────────────────────────────── */
+
+router.post('/seed', authenticateToken, (req, res) => {
+  try {
+    const { title, description, date, pdf_url, cover_photo_url } = req.body;
+
+    if (!title) {
+      return res.status(400).json({ success: false, message: 'Title is required.' });
+    }
+
+    /* Check for duplicate */
+    const existing = db.prepare('SELECT id FROM pastoral_letters WHERE title = ?').get(title);
+    if (existing) {
+      return res.json({ success: true, data: existing, message: 'Already exists, skipped.' });
+    }
+
+    const enhanced = cover_photo_url ? buildEnhancedUrl(cover_photo_url) : null;
+
+    const stmt = db.prepare(`
+      INSERT INTO pastoral_letters
+        (title, description, pdf_url, thumbnail_url, cover_photo_url, date)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `);
+
+    const result = stmt.run(title, description || null, pdf_url || null, enhanced, enhanced, date || null);
+    const created = db.prepare('SELECT * FROM pastoral_letters WHERE id = ?').get(result.lastInsertRowid);
+
+    res.status(201).json({ success: true, data: created });
+  } catch (err) {
+    console.error('Error seeding pastoral letter:', err);
+    res.status(500).json({ success: false, message: 'Failed to seed pastoral letter.' });
+  }
+});
+
+/* ──────────────────────────────────────────────
    PUBLIC — Get single pastoral letter
    ────────────────────────────────────────────── */
 
