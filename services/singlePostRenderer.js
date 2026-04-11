@@ -16,7 +16,7 @@ function renderSinglePost(item, type) {
   const pdfUrl = item.pdf_url || '';
   const description = item.description || item.body || '';
   const typeLabel = type === 'pastoral_letters' ? 'Pastoral Letter'
-    : type === 'homilies' ? 'Homily' : 'Writing';
+    : type === 'homilies' ? 'Reflection' : 'Teaching';
   const typePath = type === 'pastoral_letters' ? 'letter'
     : type === 'homilies' ? 'homily' : 'writing';
 

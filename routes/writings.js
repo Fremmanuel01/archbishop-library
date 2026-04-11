@@ -63,6 +63,43 @@ router.get('/', (req, res) => {
   }
 });
 
+/* ── PROTECTED — Seed a writing (JSON body, no file upload) ── */
+
+router.post('/seed', authenticateToken, (req, res) => {
+  try {
+    const { title, body, category, occasion, date } = req.body;
+
+    if (!title) {
+      return res.status(400).json({ success: false, message: 'Title is required.' });
+    }
+
+    /* Check for duplicate */
+    const existing = db.prepare('SELECT id FROM writings WHERE title = ?').get(title);
+    if (existing) {
+      return res.json({ success: true, data: existing, message: 'Already exists, skipped.' });
+    }
+
+    const stmt = db.prepare(`
+      INSERT INTO writings
+        (title, body, category, occasion, date, cover_photo_url, pdf_url,
+         key_quote, tags, reading_time, tone, highlights)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    const result = stmt.run(
+      title, body || null, category || null, occasion || null, date || null,
+      null, null,
+      null, '[]', null, null, '[]'
+    );
+
+    const created = db.prepare('SELECT * FROM writings WHERE id = ?').get(result.lastInsertRowid);
+    res.status(201).json({ success: true, data: created });
+  } catch (err) {
+    console.error('Error seeding writing:', err);
+    res.status(500).json({ success: false, message: 'Failed to seed writing.' });
+  }
+});
+
 /* ── PUBLIC — Get single writing ────────────── */
 
 router.get('/:id', (req, res) => {
@@ -92,7 +129,7 @@ router.post('/', authenticateToken, (req, res) => {
     const pdfFile = req.files && req.files.pdf_file ? req.files.pdf_file[0] : null;
 
     try {
-      const { title, body, category, date } = req.body;
+      const { title, body, category, occasion, date } = req.body;
 
       if (!title) {
         if (pdfFile) cleanTemp(pdfFile.path);
@@ -129,13 +166,15 @@ router.post('/', authenticateToken, (req, res) => {
 
       const stmt = db.prepare(`
         INSERT INTO writings
-          (title, body, category, date, cover_photo_url, pdf_url,
+          (title, body, category, occasion, date, cover_photo_url, pdf_url,
            key_quote, tags, reading_time, tone, highlights)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
+      const finalOccasion = occasion || null;
+
       const result = stmt.run(
-        title, finalBody, finalCategory, finalDate,
+        title, finalBody, finalCategory, finalOccasion, finalDate,
         null, pdfUrl,
         aiResult.key_quote,
         JSON.stringify(aiResult.tags),

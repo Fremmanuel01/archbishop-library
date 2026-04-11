@@ -227,6 +227,7 @@ async function initDatabase() {
   addColumn('homilies', 'tone', 'TEXT');
   addColumn('homilies', 'highlights', 'TEXT');
 
+  addColumn('writings', 'occasion', 'TEXT');
   addColumn('writings', 'cover_photo_url', 'TEXT');
   addColumn('writings', 'pdf_url', 'TEXT');
   addColumn('writings', 'key_quote', 'TEXT');

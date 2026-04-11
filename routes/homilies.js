@@ -63,6 +63,43 @@ router.get('/', (req, res) => {
   }
 });
 
+/* ── PROTECTED — Seed a homily (JSON body, no file upload) ── */
+
+router.post('/seed', authenticateToken, (req, res) => {
+  try {
+    const { title, description, occasion, date } = req.body;
+
+    if (!title) {
+      return res.status(400).json({ success: false, message: 'Title is required.' });
+    }
+
+    /* Check for duplicate */
+    const existing = db.prepare('SELECT id FROM homilies WHERE title = ?').get(title);
+    if (existing) {
+      return res.json({ success: true, data: existing, message: 'Already exists, skipped.' });
+    }
+
+    const stmt = db.prepare(`
+      INSERT INTO homilies
+        (title, description, pdf_url, thumbnail_url, cover_photo_url, occasion, date,
+         key_quote, tags, reading_time, tone, highlights)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    const result = stmt.run(
+      title, description || null, null, null, null,
+      occasion || null, date || null,
+      null, '[]', null, null, '[]'
+    );
+
+    const created = db.prepare('SELECT * FROM homilies WHERE id = ?').get(result.lastInsertRowid);
+    res.status(201).json({ success: true, data: created });
+  } catch (err) {
+    console.error('Error seeding homily:', err);
+    res.status(500).json({ success: false, message: 'Failed to seed homily.' });
+  }
+});
+
 /* ── PUBLIC — Get single homily ─────────────── */
 
 router.get('/:id', (req, res) => {

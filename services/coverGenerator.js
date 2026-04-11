@@ -22,7 +22,7 @@ async function generateCover(title, date, contentType) {
       return null;
     }
 
-    const label = contentType === 'homily' ? 'HOMILY' : 'WRITING';
+    const label = contentType === 'homily' ? 'REFLECTION' : 'TEACHING';
 
     /* Extract year from date */
     let year = new Date().getFullYear().toString();

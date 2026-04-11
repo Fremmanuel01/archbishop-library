@@ -65,7 +65,7 @@ function switchPage(page) {
   document.querySelectorAll('.page-section').forEach(s => {
     s.classList.toggle('active', s.id === 'section-' + page);
   });
-  const titles = { pastoral_letters: 'Pastoral Letters', homilies: 'Homilies', writings: 'Writings', settings: 'Settings' };
+  const titles = { pastoral_letters: 'Pastoral Letters', homilies: 'Reflections', writings: 'Other Teachings', settings: 'Settings' };
   document.getElementById('pageTitle').textContent = titles[page] || page;
   document.getElementById('breadcrumb').textContent = 'Dashboard / ' + (titles[page] || page);
   document.getElementById('statsRow').style.display = page === 'settings' ? 'none' : 'grid';
@@ -166,6 +166,7 @@ function renderTable(type) {
       <tr>
         <td><strong>${escHtml(item.title)}</strong></td>
         <td>${escHtml(item.category || '—')}</td>
+        <td>${escHtml(item.occasion || '—')}</td>
         <td>${item.date || '—'}</td>
         <td class="actions">
           <button class="btn-secondary" onclick="editItem('writings', ${item.id})">Edit</button>
@@ -183,11 +184,11 @@ function renderTable(type) {
 function openModal(type) {
   document.getElementById('editType').value = type;
 
-  const titleMap = { pastoral_letters: 'Pastoral Letter', homilies: 'Homily', writings: 'Writing' };
+  const titleMap = { pastoral_letters: 'Pastoral Letter', homilies: 'Reflection', writings: 'Teaching' };
   document.getElementById('modalTitle').textContent = 'Add New ' + titleMap[type];
 
-  /* Show/hide occasion dropdown for homilies */
-  document.getElementById('groupOccasionUpload').style.display = type === 'homilies' ? 'block' : 'none';
+  /* Show/hide occasion dropdown for homilies and writings */
+  document.getElementById('groupOccasionUpload').style.display = (type === 'homilies' || type === 'writings') ? 'block' : 'none';
   document.getElementById('groupOccasionCustom').style.display = 'none';
   document.getElementById('fieldOccasionSelect').value = '';
 
@@ -298,8 +299,8 @@ async function uploadAndProcess() {
   const formData = new FormData();
   formData.append('title', title);
 
-  /* Occasion for homilies */
-  if (type === 'homilies') {
+  /* Occasion for homilies and writings */
+  if (type === 'homilies' || type === 'writings') {
     const selVal = document.getElementById('fieldOccasionSelect').value;
     const occasion = selVal === 'Other'
       ? document.getElementById('fieldOccasionCustom').value
@@ -369,7 +370,7 @@ function showStage2(record, aiProcessed, type) {
   document.getElementById('s2Highlight3').value = highlights[2] || '';
 
   /* Show occasion/category fields */
-  document.getElementById('s2GroupOccasion').style.display = type === 'homilies' ? 'block' : 'none';
+  document.getElementById('s2GroupOccasion').style.display = (type === 'homilies' || type === 'writings') ? 'block' : 'none';
   document.getElementById('s2GroupCategory').style.display = type === 'writings' ? 'block' : 'none';
   document.getElementById('s2Occasion').value = record.occasion || '';
   document.getElementById('s2Category').value = record.category || '';
@@ -467,7 +468,7 @@ function editItem(type, id) {
   document.getElementById('editType').value = type;
   document.getElementById('editId').value = id;
 
-  const titleMap = { pastoral_letters: 'Pastoral Letter', homilies: 'Homily', writings: 'Writing' };
+  const titleMap = { pastoral_letters: 'Pastoral Letter', homilies: 'Reflection', writings: 'Teaching' };
   document.getElementById('modalTitle').textContent = 'Edit ' + titleMap[type];
 
   /* Parse JSON */
@@ -487,7 +488,7 @@ function editItem(type, id) {
   document.getElementById('editHighlight2').value = highlights[1] || '';
   document.getElementById('editHighlight3').value = highlights[2] || '';
 
-  document.getElementById('editGroupOccasion').style.display = type === 'homilies' ? 'block' : 'none';
+  document.getElementById('editGroupOccasion').style.display = (type === 'homilies' || type === 'writings') ? 'block' : 'none';
   document.getElementById('editGroupCategory').style.display = type === 'writings' ? 'block' : 'none';
   document.getElementById('editGroupCoverPhoto').style.display = type === 'pastoral_letters' ? 'block' : 'none';
   document.getElementById('editOccasion').value = item.occasion || '';
