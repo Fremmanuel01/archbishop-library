@@ -149,6 +149,35 @@ app.use('/api/writings', writingsRouter);
 app.use('/api/settings', settingsRouter);
 
 /* ──────────────────────────────────────────────
+   PDF Proxy — serves external PDFs through our
+   domain so PDF.js can load them (CORS bypass)
+   ────────────────────────────────────────────── */
+
+app.get('/api/pdf-proxy', async (req, res) => {
+  const url = req.query.url;
+  if (!url) {
+    return res.status(400).json({ success: false, message: 'URL parameter required.' });
+  }
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      return res.status(response.status).json({ success: false, message: 'Failed to fetch PDF.' });
+    }
+
+    const contentType = response.headers.get('content-type') || 'application/pdf';
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    const buffer = await response.arrayBuffer();
+    res.send(Buffer.from(buffer));
+  } catch (err) {
+    console.error('PDF proxy error:', err.message);
+    res.status(500).json({ success: false, message: 'Failed to proxy PDF.' });
+  }
+});
+
+/* ──────────────────────────────────────────────
    Single Post Pages
    ────────────────────────────────────────────── */
 

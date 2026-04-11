@@ -662,7 +662,12 @@ ${pdfUrl ? `
   const canvas = document.getElementById('pdfCanvas');
   const ctx = canvas.getContext('2d');
 
-  pdfjsLib.getDocument('${esc(pdfUrl)}').promise.then(function(pdf) {
+  var pdfSrc = '${esc(pdfUrl)}';
+  /* Use proxy for external PDFs to avoid CORS issues */
+  if (pdfSrc.indexOf(window.location.hostname) === -1) {
+    pdfSrc = '/api/pdf-proxy?url=' + encodeURIComponent(pdfSrc);
+  }
+  pdfjsLib.getDocument(pdfSrc).promise.then(function(pdf) {
     pdfDoc = pdf;
     document.getElementById('pageCount').textContent = pdf.numPages;
     renderPage(1);
