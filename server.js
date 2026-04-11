@@ -210,6 +210,17 @@ app.get('/', (req, res) => {
 const { initDatabase } = require('./database');
 
 initDatabase().then(() => {
+  /* Auto-seed admin user if none exists */
+  const existingAdmin = db.prepare('SELECT id FROM admin_users LIMIT 1').get();
+  if (!existingAdmin) {
+    const username = process.env.ADMIN_USERNAME || 'admin';
+    const hash = process.env.ADMIN_PASSWORD_HASH;
+    if (hash) {
+      db.prepare('INSERT INTO admin_users (username, password) VALUES (?, ?)').run(username, hash);
+      console.log(`Auto-seeded admin user "${username}" from environment variables.`);
+    }
+  }
+
   app.listen(PORT, () => {
     console.log(`Archbishop Library CMS running on port ${PORT}`);
     console.log(`Admin dashboard: http://localhost:${PORT}/admin`);
