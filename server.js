@@ -214,11 +214,11 @@ initDatabase().then(() => {
   const existingAdmin = db.prepare('SELECT id FROM admin_users LIMIT 1').get();
   if (!existingAdmin) {
     const username = process.env.ADMIN_USERNAME || 'admin';
-    const hash = process.env.ADMIN_PASSWORD_HASH;
-    if (hash) {
-      db.prepare('INSERT INTO admin_users (username, password) VALUES (?, ?)').run(username, hash);
-      console.log(`Auto-seeded admin user "${username}" from environment variables.`);
-    }
+    /* Hash the raw password directly — avoids $ escaping issues with env vars */
+    const rawPassword = process.env.ADMIN_RAW_PASSWORD || 'admin123';
+    const hash = bcrypt.hashSync(rawPassword, 10);
+    db.prepare('INSERT INTO admin_users (username, password) VALUES (?, ?)').run(username, hash);
+    console.log(`Auto-seeded admin user "${username}".`);
   }
 
   app.listen(PORT, () => {
