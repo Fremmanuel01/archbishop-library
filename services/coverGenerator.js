@@ -32,10 +32,12 @@ async function generateCover(title, date, contentType) {
       if (match) year = match[1];
     }
 
-    /* Truncate title for overlay (Cloudinary has URL length limits) */
+    /* Truncate and clean title for overlay (Cloudinary has URL length limits) */
     let displayTitle = title || 'Untitled';
-    if (displayTitle.length > 60) {
-      displayTitle = displayTitle.substring(0, 57) + '...';
+    /* Remove special characters that break Cloudinary URL encoding */
+    displayTitle = displayTitle.replace(/[':;""''\(\)\[\]\/\\&]/g, '');
+    if (displayTitle.length > 45) {
+      displayTitle = displayTitle.substring(0, 42) + '...';
     }
 
     /* Encode text for Cloudinary URL (replace spaces, handle special chars) */
@@ -191,11 +193,14 @@ function crc32(buf) {
  * Cloudinary text overlay syntax uses specific escaping.
  */
 function encodeCloudinaryText(text) {
-  return encodeURIComponent(text)
-    .replace(/%20/g, '%20')
-    .replace(/%2C/g, ',')
-    .replace(/\(/g, '%28')
-    .replace(/\)/g, '%29');
+  /* Clean problematic characters first */
+  let clean = text
+    .replace(/['']/g, "'")
+    .replace(/[""]/g, '"')
+    .replace(/[:;\/\\&\(\)\[\]{}#%\?\+\=]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return encodeURIComponent(clean);
 }
 
 module.exports = { generateCover };
