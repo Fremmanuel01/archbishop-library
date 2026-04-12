@@ -7,6 +7,7 @@ const fs = require('fs');
 const db = require('../database');
 const authenticateToken = require('../middleware/auth');
 const { processDocument } = require('../services/aiProcessor');
+const { enhanceCover } = require('../services/coverEnhancer');
 
 /* ──────────────────────────────────────────────
    Cloudinary config
@@ -233,7 +234,20 @@ router.post('/', authenticateToken, (req, res) => {
         JSON.stringify(aiResult.highlights)
       );
 
-      const created = db.prepare('SELECT * FROM pastoral_letters WHERE id = ?').get(result.lastInsertRowid);
+      const recordId = result.lastInsertRowid;
+
+      /* Run AI cover enhancement in background if cover was uploaded */
+      if (coverPhotoUrl) {
+        enhanceCover(coverPhotoUrl, title).then(enhancedUrl => {
+          if (enhancedUrl) {
+            db.prepare('UPDATE pastoral_letters SET cover_photo_url = ?, thumbnail_url = ? WHERE id = ?')
+              .run(enhancedUrl, enhancedUrl, recordId);
+            console.log('Enhanced cover for pastoral letter ' + recordId);
+          }
+        }).catch(e => console.error('Cover enhancement error:', e.message));
+      }
+
+      const created = db.prepare('SELECT * FROM pastoral_letters WHERE id = ?').get(recordId);
 
       res.status(201).json({ success: true, data: created, ai_processed: aiProcessed });
     } catch (err) {
