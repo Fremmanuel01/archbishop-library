@@ -13,6 +13,10 @@ let currentPage = 'pastoral_letters';
 let contentCache = { pastoral_letters: [], homilies: [], writings: [] };
 let pendingDeleteType = null;
 let pendingDeleteId = null;
+let lastFocusedEl = null;
+let lastConfirmFocusedEl = null;
+
+const SPINNER_HTML = '<span class="btn-spinner" aria-hidden="true"></span>';
 
 /* ── Init ─────────────────────────────────── */
 
@@ -23,9 +27,33 @@ document.addEventListener('DOMContentLoaded', () => {
   setupLogout();
   setupPasswordForm();
   setupDropZones();
+  setupKeyboardHandlers();
   displayApiUrl();
   loadAllData();
 });
+
+function setupKeyboardHandlers() {
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const confirmOverlay = document.getElementById('confirmOverlay');
+    if (confirmOverlay.classList.contains('active')) {
+      closeConfirm();
+      return;
+    }
+    const modalOverlay = document.getElementById('modalOverlay');
+    if (modalOverlay.classList.contains('active')) {
+      closeModal();
+    }
+  });
+
+  /* Click outside modal to dismiss */
+  document.getElementById('modalOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'modalOverlay') closeModal();
+  });
+  document.getElementById('confirmOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'confirmOverlay') closeConfirm();
+  });
+}
 
 /* ── Auth helpers ─────────────────────────── */
 
@@ -72,8 +100,11 @@ function switchPage(page) {
 }
 
 function setupMobileToggle() {
-  document.getElementById('mobileToggle').addEventListener('click', () => {
-    document.getElementById('sidebar').classList.toggle('open');
+  const btn = document.getElementById('mobileToggle');
+  btn.addEventListener('click', () => {
+    const sidebar = document.getElementById('sidebar');
+    const open = sidebar.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
 }
 
@@ -212,11 +243,20 @@ function openModal(type) {
   document.getElementById('modalStage2').style.display = 'none';
   document.getElementById('modalEdit').style.display = 'none';
 
+  lastFocusedEl = document.activeElement;
   document.getElementById('modalOverlay').classList.add('active');
+  setTimeout(() => {
+    const firstInput = document.querySelector('#modalStage1 input, #modalStage1 select, #modalStage1 textarea');
+    if (firstInput) firstInput.focus();
+  }, 50);
 }
 
 function closeModal() {
   document.getElementById('modalOverlay').classList.remove('active');
+  if (lastFocusedEl && typeof lastFocusedEl.focus === 'function') {
+    lastFocusedEl.focus();
+    lastFocusedEl = null;
+  }
 }
 
 function toggleCustomOccasion() {
@@ -271,7 +311,7 @@ function handleFilePreview(input, previewId, zoneId) {
     reader.readAsDataURL(file);
   } else {
     const div = document.getElementById(previewId);
-    div.innerHTML = '📄 <strong>' + escHtml(file.name) + '</strong><br><small>' + (file.size / 1024 / 1024).toFixed(1) + ' MB</small>';
+    div.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin-right:6px;" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><strong>' + escHtml(file.name) + '</strong><br><small>' + (file.size / 1024 / 1024).toFixed(1) + ' MB</small>';
     div.style.display = 'block';
   }
 }
@@ -289,6 +329,7 @@ async function uploadAndProcess() {
 
   const btn = document.getElementById('uploadBtn');
   btn.disabled = true;
+  btn.innerHTML = SPINNER_HTML + 'Processing…';
 
   /* Show loading */
   document.getElementById('modalStage1').style.display = 'none';
@@ -336,6 +377,7 @@ async function uploadAndProcess() {
     document.getElementById('modalStage1').style.display = 'block';
   } finally {
     btn.disabled = false;
+    btn.textContent = 'Upload & Process with AI →';
   }
 }
 
@@ -410,7 +452,7 @@ async function publishContent() {
 
   const btn = document.getElementById('publishBtn');
   btn.disabled = true;
-  btn.textContent = 'Publishing…';
+  btn.innerHTML = SPINNER_HTML + 'Publishing…';
 
   try {
     const res = await fetch(API + endpointMap[type] + '/' + id, {
@@ -504,7 +546,9 @@ function editItem(type, id) {
   document.getElementById('modalStage2').style.display = 'none';
   document.getElementById('modalEdit').style.display = 'block';
 
+  lastFocusedEl = document.activeElement;
   document.getElementById('modalOverlay').classList.add('active');
+  setTimeout(() => document.getElementById('editTitle').focus(), 50);
 }
 
 async function saveEdit() {
@@ -514,7 +558,7 @@ async function saveEdit() {
 
   const btn = document.getElementById('editSaveBtn');
   btn.disabled = true;
-  btn.textContent = 'Saving…';
+  btn.innerHTML = SPINNER_HTML + 'Saving…';
 
   const tags = document.getElementById('editTags').value.split(',').map(t => t.trim()).filter(Boolean);
   const highlights = [
@@ -608,14 +652,20 @@ function confirmDelete(type, id, title) {
   pendingDeleteId = id;
   document.getElementById('confirmMessage').textContent =
     'Are you sure you want to delete "' + title + '"? This action cannot be undone.';
+  lastConfirmFocusedEl = document.activeElement;
   document.getElementById('confirmOverlay').classList.add('active');
   document.getElementById('confirmDeleteBtn').onclick = () => executeDelete();
+  setTimeout(() => document.getElementById('confirmDeleteBtn').focus(), 50);
 }
 
 function closeConfirm() {
   document.getElementById('confirmOverlay').classList.remove('active');
   pendingDeleteType = null;
   pendingDeleteId = null;
+  if (lastConfirmFocusedEl && typeof lastConfirmFocusedEl.focus === 'function') {
+    lastConfirmFocusedEl.focus();
+    lastConfirmFocusedEl = null;
+  }
 }
 
 async function executeDelete() {
@@ -645,7 +695,8 @@ async function executeDelete() {
 /* ── Change Password ──────────────────────── */
 
 function setupPasswordForm() {
-  document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+  const form = document.getElementById('changePasswordForm');
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const current = document.getElementById('currentPassword').value;
     const newPass = document.getElementById('newPassword').value;
@@ -653,6 +704,10 @@ function setupPasswordForm() {
 
     if (newPass.length < 6) { showToast('New password must be at least 6 characters.', 'error'); return; }
     if (newPass !== confirm) { showToast('New passwords do not match.', 'error'); return; }
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = SPINNER_HTML + 'Updating…';
 
     try {
       const res = await fetch(API + '/auth/change-password', {
@@ -663,12 +718,15 @@ function setupPasswordForm() {
       const data = await res.json();
       if (data.success) {
         showToast('Password updated successfully.', 'success');
-        document.getElementById('changePasswordForm').reset();
+        form.reset();
       } else {
         showToast(data.message || 'Failed to update password.', 'error');
       }
     } catch (err) {
       showToast('Failed to update password.', 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Update Password';
     }
   });
 }

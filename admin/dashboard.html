@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Archbishop Library — Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -53,7 +53,9 @@
   <!-- ── Main ────────────────────────────────── -->
   <div class="main">
     <header class="topbar">
-      <button class="mobile-toggle" id="mobileToggle">☰</button>
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
       <h1 id="pageTitle">Pastoral Letters</h1>
       <span class="breadcrumb" id="breadcrumb">Dashboard / Pastoral Letters</span>
     </header>
@@ -95,8 +97,9 @@
             <tbody id="table-pastoral_letters"></tbody>
           </table>
           <div class="empty-state" id="empty-pastoral_letters" style="display:none;">
-            <div class="icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-            <p>No pastoral letters yet. Click "Add New" to create one.</p>
+            <div class="icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.5;" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <p>No pastoral letters yet.</p>
+            <button class="empty-cta" onclick="openModal('pastoral_letters')">+ Add Pastoral Letter</button>
           </div>
         </div>
       </div>
@@ -121,8 +124,9 @@
             <tbody id="table-homilies"></tbody>
           </table>
           <div class="empty-state" id="empty-homilies" style="display:none;">
-            <div class="icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg></div>
-            <p>No reflections yet. Click "Add New" to create one.</p>
+            <div class="icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.5;" aria-hidden="true"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg></div>
+            <p>No reflections yet.</p>
+            <button class="empty-cta" onclick="openModal('homilies')">+ Add Reflection</button>
           </div>
         </div>
       </div>
@@ -147,8 +151,9 @@
             <tbody id="table-writings"></tbody>
           </table>
           <div class="empty-state" id="empty-writings" style="display:none;">
-            <div class="icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3;"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
-            <p>No other teachings yet. Click "Add New" to create one.</p>
+            <div class="icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.5;" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+            <p>No other teachings yet.</p>
+            <button class="empty-cta" onclick="openModal('writings')">+ Add Teaching</button>
           </div>
         </div>
       </div>
@@ -263,20 +268,20 @@
             <div class="drop-zone" id="dropCover" onclick="document.getElementById('fileCover').click()">
               <input type="file" id="fileCover" accept=".jpg,.jpeg,.png" style="display:none" onchange="handleFilePreview(this,'previewCover','dropCover')">
               <div class="drop-zone-prompt" id="promptCover">
-                <span style="font-size:32px;display:block;margin-bottom:8px;">🖼</span>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 8px;opacity:0.6;" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                 Drag & drop or click to select<br>
                 <small>JPG or PNG, max 5 MB</small>
               </div>
               <img id="previewCover" class="drop-preview" style="display:none;">
             </div>
             <div class="auto-notice" id="noticeEnhance" style="margin-top:8px;">
-              <span class="notice-icon">✨</span> Your photo will be automatically enhanced for a premium look
+              <span class="notice-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8.5 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 9 8.5 12 2"/></svg></span> Your photo will be automatically enhanced for a premium look
             </div>
           </div>
 
           <!-- Auto-cover notice: shown for homilies & writings -->
           <div class="auto-notice" id="noticeAutoCover" style="display:none;">
-            <span class="notice-icon">ℹ️</span> A branded cover will be automatically generated
+            <span class="notice-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span> A branded cover will be automatically generated
           </div>
 
           <div class="form-group">
@@ -284,7 +289,7 @@
             <div class="drop-zone" id="dropPdf" onclick="document.getElementById('filePdf').click()">
               <input type="file" id="filePdf" accept=".pdf" style="display:none" onchange="handleFilePreview(this,'previewPdf','dropPdf')">
               <div class="drop-zone-prompt" id="promptPdf">
-                <span style="font-size:32px;display:block;margin-bottom:8px;">📄</span>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 8px;opacity:0.6;" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 Drag & drop or click to select<br>
                 <small>PDF only, max 50 MB</small>
               </div>
@@ -322,33 +327,33 @@
           </div>
 
           <div class="form-group">
-            <label>Summary <span class="ai-badge">AI</span></label>
+            <label>Summary <span class="ai-badge" title="Auto-filled by AI from the uploaded PDF. Review and edit as needed.">AI</span></label>
             <textarea id="s2Summary" rows="3"></textarea>
           </div>
 
           <div class="form-group">
-            <label>Date <span class="ai-badge">AI</span></label>
+            <label>Date <span class="ai-badge" title="Auto-filled by AI from the uploaded PDF. Review and edit as needed.">AI</span></label>
             <input type="date" id="s2Date">
           </div>
 
           <div class="form-group">
-            <label>Key Quote <span class="ai-badge">AI</span></label>
+            <label>Key Quote <span class="ai-badge" title="Auto-filled by AI from the uploaded PDF. Review and edit as needed.">AI</span></label>
             <input type="text" id="s2KeyQuote">
           </div>
 
           <div class="form-group">
-            <label>Tags <span class="ai-badge">AI</span></label>
+            <label>Tags <span class="ai-badge" title="Auto-filled by AI from the uploaded PDF. Review and edit as needed.">AI</span></label>
             <input type="text" id="s2Tags" placeholder="Comma-separated tags">
             <span class="help-text">Separate tags with commas</span>
           </div>
 
           <div class="form-group">
-            <label>Reading Time <span class="ai-badge">AI</span></label>
+            <label>Reading Time <span class="ai-badge" title="Auto-filled by AI from the uploaded PDF. Review and edit as needed.">AI</span></label>
             <input type="text" id="s2ReadingTime" placeholder="e.g. 6 mins">
           </div>
 
           <div class="form-group">
-            <label>Tone <span class="ai-badge">AI</span></label>
+            <label>Tone <span class="ai-badge" title="Auto-filled by AI from the uploaded PDF. Review and edit as needed.">AI</span></label>
             <select id="s2Tone">
               <option value="">— Select —</option>
               <option value="Reflective">Reflective</option>
@@ -360,17 +365,17 @@
           </div>
 
           <div class="form-group" id="s2GroupOccasion" style="display:none;">
-            <label>Occasion <span class="ai-badge">AI</span></label>
+            <label>Occasion <span class="ai-badge" title="Auto-filled by AI from the uploaded PDF. Review and edit as needed.">AI</span></label>
             <input type="text" id="s2Occasion">
           </div>
 
           <div class="form-group" id="s2GroupCategory" style="display:none;">
-            <label>Category <span class="ai-badge">AI</span></label>
+            <label>Category <span class="ai-badge" title="Auto-filled by AI from the uploaded PDF. Review and edit as needed.">AI</span></label>
             <input type="text" id="s2Category">
           </div>
 
           <div class="form-group">
-            <label>Highlights <span class="ai-badge">AI</span></label>
+            <label>Highlights <span class="ai-badge" title="Auto-filled by AI from the uploaded PDF. Review and edit as needed.">AI</span></label>
             <input type="text" id="s2Highlight1" placeholder="Highlight 1" style="margin-bottom:8px;">
             <input type="text" id="s2Highlight2" placeholder="Highlight 2" style="margin-bottom:8px;">
             <input type="text" id="s2Highlight3" placeholder="Highlight 3">

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Archbishop Library — Admin Login</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -173,6 +173,22 @@
       75% { transform: translateX(6px); }
     }
 
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
     .footer-text {
       margin-top: 24px;
       font-size: 11px;
@@ -228,7 +244,7 @@
       }
 
       loginBtn.disabled = true;
-      loginBtn.textContent = 'Signing in…';
+      loginBtn.innerHTML = '<span class="btn-spinner" style="display:inline-block;width:13px;height:13px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:-2px;margin-right:8px;"></span>Signing in…';
 
       try {
         const res = await fetch('/api/auth/login', {

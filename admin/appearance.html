@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Archbishop Library — Appearance</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -53,7 +53,9 @@
   <!-- ── Main ────────────────────────────────── -->
   <div class="main">
     <header class="topbar">
-      <button class="mobile-toggle" id="mobileToggle">☰</button>
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
       <h1>Appearance Settings</h1>
       <span class="breadcrumb">Dashboard / Appearance</span>
     </header>
@@ -250,8 +252,10 @@
     }
 
     function setupMobileToggle() {
-      document.getElementById('mobileToggle').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('open');
+      const btn = document.getElementById('mobileToggle');
+      btn.addEventListener('click', () => {
+        const open = document.getElementById('sidebar').classList.toggle('open');
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
       });
     }
 
