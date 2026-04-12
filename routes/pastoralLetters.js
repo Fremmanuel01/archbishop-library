@@ -316,6 +316,20 @@ router.put('/:id', authenticateToken, (req, res) => {
       );
 
       const updated = db.prepare('SELECT * FROM pastoral_letters WHERE id = ?').get(req.params.id);
+
+      /* If a new cover was uploaded, run AI cover enhancement in background */
+      if (coverFile && coverPhotoUrl) {
+        const recordId = req.params.id;
+        const enhanceTitle = title || existing.title;
+        enhanceCover(coverPhotoUrl, enhanceTitle).then(enhancedUrl => {
+          if (enhancedUrl) {
+            db.prepare('UPDATE pastoral_letters SET cover_photo_url = ?, thumbnail_url = ? WHERE id = ?')
+              .run(enhancedUrl, enhancedUrl, recordId);
+            console.log('Enhanced cover for pastoral letter ' + recordId);
+          }
+        }).catch(e => console.error('Cover enhancement error:', e.message));
+      }
+
       res.json({ success: true, data: updated });
     } catch (err) {
       if (coverFile) cleanTemp(coverFile.path);
