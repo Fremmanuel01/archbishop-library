@@ -194,44 +194,46 @@ function abcontent_style_block( $cls, $s ) {
     $fsize   = ! empty( $s['font_size'] )        ? $s['font_size']        : '16px';
 
     return "<style>
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap');
-    .{$cls}{font-family:'Lora',serif;font-size:{$fsize};color:{$text};background:{$bg};padding:24px;border-radius:12px;-webkit-font-smoothing:antialiased;}
-    .{$cls} h3{font-family:'Cinzel',serif;color:{$primary};margin:0 0 8px;font-weight:600;letter-spacing:0.3px;}
-    .{$cls} .ab-card{background:{$bg};border:none;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06);transition:transform 0.3s ease,box-shadow 0.3s ease;}
-    .{$cls} .ab-card:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(0,0,0,0.12);}
-    .{$cls} .ab-cover{width:100%;height:220px;object-fit:cover;display:block;}
-    .{$cls} .ab-cover-placeholder{width:100%;height:220px;background:linear-gradient(135deg,#0a1c33,{$primary});display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.15);font-size:48px;}
-    .{$cls} .ab-card-body{padding:20px 22px;}
-    .{$cls} .ab-badges{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
-    .{$cls} .ab-badge{display:inline-block;padding:4px 12px;border-radius:9999px;font-family:'Cinzel',serif;font-size:10px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;}
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+    .{$cls}{font-family:'Inter','Lora',sans-serif;font-size:{$fsize};color:#0f172a;background:{$bg};padding:24px;border-radius:12px;-webkit-font-smoothing:antialiased;}
+    .{$cls} h3{font-family:'Playfair Display',Georgia,serif;color:#0f172a;margin:0 0 6px;font-weight:600;letter-spacing:-0.01em;font-size:17px;line-height:1.3;}
+    /* Tailwind-style card: bg-white rounded-2xl ring-1 ring-slate-200/70 shadow-sm hover:shadow-xl */
+    .{$cls} .ab-card{background:#ffffff;border:none;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(15,23,42,0.04),0 1px 3px rgba(15,23,42,0.06);outline:1px solid rgba(226,232,240,0.7);outline-offset:-1px;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1),box-shadow 0.3s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;}
+    .{$cls} .ab-card:hover{transform:translateY(-4px);box-shadow:0 10px 15px -3px rgba(15,23,42,0.08),0 20px 40px -8px rgba(15,23,42,0.12);}
+    .{$cls} .ab-cover-wrap{width:100%;aspect-ratio:4/5;background:#f8fafc;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+    .{$cls} .ab-cover{width:100%;height:100%;object-fit:contain;display:block;}
+    .{$cls} .ab-cover-placeholder{width:100%;aspect-ratio:4/5;background:linear-gradient(135deg,#0a1c33,{$primary});display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.15);font-size:48px;}
+    .{$cls} .ab-card-body{padding:18px 20px 20px;display:flex;flex-direction:column;flex:1;}
+    .{$cls} .ab-badges{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
+    .{$cls} .ab-badge{display:inline-block;padding:3px 10px;border-radius:9999px;font-family:'Inter',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;}
     .{$cls} .ab-badge-tone{color:#fff;}
-    .{$cls} .ab-badge-time{background:{$primary}10;color:{$primary};}
-    .{$cls} .ab-date{font-size:13px;color:{$text}88;margin-bottom:10px;}
-    .{$cls} .ab-desc{font-size:14px;line-height:1.7;margin-bottom:14px;color:{$text}bb;}
-    .{$cls} .ab-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
-    .{$cls} .ab-btn{display:inline-block;padding:calc(.5em + 2px) calc(1.2em + 2px);border-radius:9999px;font-family:'Cinzel',serif;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;text-decoration:none;transition:all 0.3s ease;}
-    .{$cls} .ab-btn:hover{transform:translateY(-2px);}
-    .{$cls} .ab-btn-primary{background:{$accent};color:#fff;box-shadow:0 4px 14px rgba(201,168,76,0.25);}
-    .{$cls} .ab-btn-primary:hover{box-shadow:0 6px 20px rgba(201,168,76,0.4);}
-    .{$cls} .ab-btn-outline{background:transparent;color:{$primary};border:1.5px solid {$primary}30;}
-    .{$cls} .ab-btn-outline:hover{border-color:{$primary};background:{$primary}06;}
-    .{$cls} .ab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;}
+    .{$cls} .ab-badge-time{background:#f1f5f9;color:#475569;}
+    .{$cls} .ab-date{font-family:'Inter',sans-serif;font-size:12px;color:#64748b;margin-bottom:10px;font-weight:500;}
+    .{$cls} .ab-desc{font-family:'Inter',sans-serif;font-size:13.5px;line-height:1.6;margin-bottom:14px;color:#475569;}
+    .{$cls} .ab-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:4px;}
+    .{$cls} .ab-btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 16px;border-radius:10px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.2px;text-decoration:none;transition:all 0.2s ease;border:1px solid transparent;}
+    .{$cls} .ab-btn:hover{transform:translateY(-1px);}
+    .{$cls} .ab-btn-primary{background:#0f172a;color:#fff;box-shadow:0 1px 2px rgba(15,23,42,0.08);}
+    .{$cls} .ab-btn-primary:hover{background:#1e293b;box-shadow:0 4px 12px rgba(15,23,42,0.18);}
+    .{$cls} .ab-btn-outline{background:#fff;color:#0f172a;border-color:#e2e8f0;}
+    .{$cls} .ab-btn-outline:hover{border-color:#cbd5e1;background:#f8fafc;}
+    .{$cls} .ab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;}
     .{$cls} .ab-list .ab-item{display:flex;gap:24px;padding:24px 0;border-bottom:1px solid {$text}08;align-items:flex-start;}
     .{$cls} .ab-list .ab-item:last-child{border-bottom:none;}
-    .{$cls} .ab-list .ab-item-thumb{width:180px;height:130px;border-radius:10px;object-fit:cover;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,0.08);}
+    .{$cls} .ab-list .ab-item-thumb{width:140px;aspect-ratio:4/5;height:auto;border-radius:10px;object-fit:contain;background:#fff;flex-shrink:0;box-shadow:0 1px 3px rgba(15,28,51,0.04),0 8px 22px rgba(15,28,51,0.08);}
     .{$cls} .ab-list .ab-item-body{flex:1;min-width:0;}
     .{$cls} .ab-magazine-featured{position:relative;border-radius:16px;overflow:hidden;margin-bottom:28px;min-height:340px;display:flex;align-items:flex-end;}
     .{$cls} .ab-magazine-featured .ab-feat-bg{position:absolute;inset:0;background-size:cover;background-position:center;}
     .{$cls} .ab-magazine-featured .ab-feat-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,28,51,0.92) 0%,rgba(10,28,51,0.4) 50%,transparent 100%);}
     .{$cls} .ab-magazine-featured .ab-feat-content{position:relative;z-index:2;padding:36px;color:#fff;width:100%;}
-    .{$cls} .ab-magazine-featured h3{color:#fff;font-size:24px;font-family:'Cinzel Decorative',serif;font-weight:400;}
+    .{$cls} .ab-magazine-featured h3{color:#fff;font-size:24px;font-family:'Playfair Display',Georgia,serif;font-weight:600;letter-spacing:-0.01em;line-height:1.25;}
     .{$cls} .ab-magazine-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px;}
     .{$cls} table.ab-table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden;}
-    .{$cls} table.ab-table th{background:linear-gradient(135deg,#0a1c33,{$primary});color:#fff;padding:14px 18px;text-align:left;font-family:'Cinzel',serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;}
+    .{$cls} table.ab-table th{background:#0f172a;color:#fff;padding:14px 18px;text-align:left;font-family:'Inter',sans-serif;font-size:11px;letter-spacing:0.8px;text-transform:uppercase;font-weight:600;}
     .{$cls} table.ab-table td{padding:14px 18px;border-bottom:1px solid {$text}08;font-size:14px;vertical-align:middle;}
     .{$cls} table.ab-table tr:nth-child(even) td{background:{$primary}03;}
     .{$cls} table.ab-table tr:hover td{background:rgba(201,168,76,0.06);}
-    .{$cls} table.ab-table .ab-table-thumb{width:64px;height:48px;border-radius:6px;object-fit:cover;box-shadow:0 2px 6px rgba(0,0,0,0.08);}
+    .{$cls} table.ab-table .ab-table-thumb{width:52px;height:65px;border-radius:6px;object-fit:contain;background:#fff;box-shadow:0 2px 6px rgba(15,28,51,0.08);}
     .{$cls} .ab-star{color:{$accent};font-size:12px;}
     </style>";
 }
@@ -256,7 +258,7 @@ function abcontent_card_badges( $item ) {
 function abcontent_card_cover( $item, $class = 'ab-cover' ) {
     $cover = ! empty( $item['cover_photo_url'] ) ? $item['cover_photo_url'] : ( ! empty( $item['thumbnail_url'] ) ? $item['thumbnail_url'] : '' );
     if ( $cover ) {
-        return '<img class="' . $class . '" src="' . esc_url( $cover ) . '" alt="' . esc_attr( $item['title'] ) . '" loading="lazy">';
+        return '<div class="ab-cover-wrap"><img class="' . $class . '" src="' . esc_url( $cover ) . '" alt="' . esc_attr( $item['title'] ) . '" loading="lazy"></div>';
     }
     return '<div class="ab-cover-placeholder">✝</div>';
 }
