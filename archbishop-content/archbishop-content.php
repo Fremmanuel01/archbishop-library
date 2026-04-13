@@ -3,7 +3,7 @@
  * Plugin Name: Archbishop Content
  * Plugin URI:  https://archbishopokeke.com
  * Description: Displays pastoral letters, homilies, and writings from the Archbishop Library CMS via shortcodes.
- * Version:     2.0.0
+ * Version:     2.1.0
  * Author:      Archbishop Library CMS
  * License:     GPL-2.0-or-later
  */
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'ABCONTENT_VERSION', '2.0.0' );
+define( 'ABCONTENT_VERSION', '2.1.0' );
 define( 'ABCONTENT_CACHE_TTL', 300 );
 
 /* ══════════════════════════════════════════════
@@ -197,11 +197,14 @@ function abcontent_style_block( $cls, $s ) {
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap');
     .{$cls}{font-family:'Inter','Lora',sans-serif;font-size:{$fsize};color:#0f172a;background:{$bg};padding:24px;border-radius:12px;-webkit-font-smoothing:antialiased;}
     .{$cls} h3{font-family:'Playfair Display',Georgia,serif;color:#0f172a;margin:0 0 6px;font-weight:600;letter-spacing:-0.01em;font-size:17px;line-height:1.3;}
-    /* Tailwind-style card: bg-white rounded-2xl ring-1 ring-slate-200/70 shadow-sm hover:shadow-xl */
-    .{$cls} .ab-card{background:#ffffff;border:none;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(15,23,42,0.04),0 1px 3px rgba(15,23,42,0.06);outline:1px solid rgba(226,232,240,0.7);outline-offset:-1px;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1),box-shadow 0.3s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;}
+    /* Tailwind-style card with cursor-follow gradient glow border */
+    .{$cls} .ab-card{position:relative;background:#ffffff;border:none;border-radius:16px;padding:2px;overflow:hidden;box-shadow:0 1px 2px rgba(15,23,42,0.04),0 1px 3px rgba(15,23,42,0.06);outline:1px solid rgba(226,232,240,0.7);outline-offset:-1px;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1),box-shadow 0.3s cubic-bezier(0.4,0,0.2,1);}
     .{$cls} .ab-card:hover{transform:translateY(-4px);box-shadow:0 10px 15px -3px rgba(15,23,42,0.08),0 20px 40px -8px rgba(15,23,42,0.12);}
-    .{$cls} .ab-cover-wrap{width:100%;aspect-ratio:4/5;background:#f8fafc;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-    .{$cls} .ab-cover{width:100%;height:100%;object-fit:contain;display:block;}
+    .{$cls} .ab-glow{pointer-events:none;position:absolute;width:240px;height:240px;border-radius:9999px;filter:blur(60px);background:radial-gradient(circle at center,#60a5fa 0%,#6366f1 45%,#a855f7 100%);opacity:0;transition:opacity 0.3s ease;z-index:0;transform:translate(-50%,-50%);}
+    .{$cls} .ab-card:hover .ab-glow{opacity:0.85;}
+    .{$cls} .ab-card-inner{position:relative;z-index:1;background:#ffffff;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;height:100%;}
+    .{$cls} .ab-cover-wrap{width:100% !important;aspect-ratio:4/5;background:#f8fafc;display:flex;align-items:center;justify-content:center;overflow:hidden;max-height:420px;}
+    .{$cls} .ab-cover{width:100% !important;max-width:100% !important;height:100% !important;max-height:420px !important;object-fit:contain;display:block;}
     .{$cls} .ab-cover-placeholder{width:100%;aspect-ratio:4/5;background:linear-gradient(135deg,#0a1c33,{$primary});display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.15);font-size:48px;}
     .{$cls} .ab-card-body{padding:18px 20px 20px;display:flex;flex-direction:column;flex:1;}
     .{$cls} .ab-badges{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
@@ -220,7 +223,8 @@ function abcontent_style_block( $cls, $s ) {
     .{$cls} .ab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;}
     .{$cls} .ab-list .ab-item{display:flex;gap:24px;padding:24px 0;border-bottom:1px solid {$text}08;align-items:flex-start;}
     .{$cls} .ab-list .ab-item:last-child{border-bottom:none;}
-    .{$cls} .ab-list .ab-item-thumb{width:140px;aspect-ratio:4/5;height:auto;border-radius:10px;object-fit:contain;background:#fff;flex-shrink:0;box-shadow:0 1px 3px rgba(15,28,51,0.04),0 8px 22px rgba(15,28,51,0.08);}
+    .{$cls} .ab-list .ab-item-thumb{width:140px !important;max-width:140px !important;height:auto !important;max-height:175px !important;aspect-ratio:4/5;border-radius:10px;object-fit:contain;background:#fff;flex-shrink:0;box-shadow:0 1px 3px rgba(15,28,51,0.04),0 8px 22px rgba(15,28,51,0.08);}
+    @media (max-width:600px){.{$cls} .ab-list .ab-item{flex-direction:column;}.{$cls} .ab-list .ab-item-thumb{width:120px !important;max-width:120px !important;}}
     .{$cls} .ab-list .ab-item-body{flex:1;min-width:0;}
     .{$cls} .ab-magazine-featured{position:relative;border-radius:16px;overflow:hidden;margin-bottom:28px;min-height:340px;display:flex;align-items:flex-end;}
     .{$cls} .ab-magazine-featured .ab-feat-bg{position:absolute;inset:0;background-size:cover;background-position:center;}
@@ -276,6 +280,27 @@ function abcontent_card_actions( $item, $type ) {
     return $html;
 }
 
+/**
+ * Strip markdown formatting down to plain text.
+ * Removes: headings (##), bold/italic (**_), backslash-escapes (1\.),
+ * inline links, list bullets, code ticks, blockquotes, horizontal rules.
+ */
+function abcontent_strip_markdown( $text ) {
+    $text = preg_replace( '/!\[[^\]]*\]\([^)]*\)/', '', $text );             // images
+    $text = preg_replace( '/\[([^\]]+)\]\([^)]*\)/', '$1', $text );          // links → link text only
+    $text = preg_replace( '/^\s{0,3}#{1,6}\s*/m', '', $text );               // headings
+    $text = preg_replace( '/^\s*>\s?/m', '', $text );                        // blockquotes
+    $text = preg_replace( '/^\s*[-*+]\s+/m', '', $text );                    // bullet lists
+    $text = preg_replace( '/^\s*\d+\.\s+/m', '', $text );                    // numbered lists
+    $text = preg_replace( '/^\s*-{3,}\s*$/m', '', $text );                   // horizontal rules
+    $text = preg_replace( '/(\*\*|__)(.*?)\1/s', '$2', $text );              // bold
+    $text = preg_replace( '/(\*|_)(.*?)\1/s', '$2', $text );                 // italics
+    $text = preg_replace( '/`([^`]*)`/', '$1', $text );                      // inline code
+    $text = preg_replace( '/\\\\([\\\\`*_{}\[\]()#+\-.!])/', '$1', $text );  // backslash-escapes
+    $text = preg_replace( '/\s+/', ' ', $text );                             // collapse whitespace
+    return trim( $text );
+}
+
 function abcontent_excerpt( $item, $type, $len = 120 ) {
     $text = '';
     if ( $type === 'writings' && ! empty( $item['body'] ) ) {
@@ -284,7 +309,8 @@ function abcontent_excerpt( $item, $type, $len = 120 ) {
         $text = $item['description'];
     }
     if ( ! $text ) return '';
-    $excerpt = mb_strlen( $text ) > $len ? mb_substr( $text, 0, $len ) . '...' : $text;
+    $plain   = abcontent_strip_markdown( $text );
+    $excerpt = mb_strlen( $plain ) > $len ? mb_substr( $plain, 0, $len ) . '…' : $plain;
     return '<p class="ab-desc">' . esc_html( $excerpt ) . '</p>';
 }
 
@@ -293,7 +319,9 @@ function abcontent_excerpt( $item, $type, $len = 120 ) {
 function abcontent_render_grid( $items, $type ) {
     $html = '<div class="ab-grid">';
     foreach ( $items as $item ) {
-        $html .= '<div class="ab-card">';
+        $html .= '<div class="ab-card" data-glow="1">';
+        $html .= '<div class="ab-glow"></div>';
+        $html .= '<div class="ab-card-inner">';
         $html .= abcontent_card_cover( $item );
         $html .= '<div class="ab-card-body">';
         $html .= abcontent_card_badges( $item );
@@ -301,7 +329,7 @@ function abcontent_render_grid( $items, $type ) {
         $html .= abcontent_excerpt( $item, $type );
         $html .= '<p class="ab-date">' . esc_html( $item['date'] ?? '' ) . '</p>';
         $html .= abcontent_card_actions( $item, $type );
-        $html .= '</div></div>';
+        $html .= '</div></div></div>';
     }
     $html .= '</div>';
     return $html;
@@ -362,21 +390,25 @@ function abcontent_render_magazine( $items, $type ) {
     $html .= '<div class="ab-feat-content">';
     $html .= abcontent_card_badges( $featured );
     $html .= '<h3>' . esc_html( $featured['title'] ) . '</h3>';
-    $html .= '<p class="ab-desc" style="color:rgba(255,255,255,0.85);">' . esc_html( mb_substr( $featured['description'] ?? $featured['body'] ?? '', 0, 180 ) ) . '</p>';
+    $feat_raw = $featured['description'] ?? $featured['body'] ?? '';
+    $feat_plain = abcontent_strip_markdown( $feat_raw );
+    $html .= '<p class="ab-desc" style="color:rgba(255,255,255,0.85);">' . esc_html( mb_substr( $feat_plain, 0, 180 ) ) . '</p>';
     $html .= abcontent_card_actions( $featured, $type );
     $html .= '</div></div>';
 
     if ( ! empty( $items ) ) {
         $html .= '<div class="ab-magazine-grid">';
         foreach ( $items as $item ) {
-            $html .= '<div class="ab-card">';
+            $html .= '<div class="ab-card" data-glow="1">';
+            $html .= '<div class="ab-glow"></div>';
+            $html .= '<div class="ab-card-inner">';
             $html .= abcontent_card_cover( $item );
             $html .= '<div class="ab-card-body">';
             $html .= abcontent_card_badges( $item );
             $html .= '<h3>' . esc_html( $item['title'] ) . '</h3>';
             $html .= '<p class="ab-date">' . esc_html( $item['date'] ?? '' ) . '</p>';
             $html .= abcontent_card_actions( $item, $type );
-            $html .= '</div></div>';
+            $html .= '</div></div></div>';
         }
         $html .= '</div>';
     }
@@ -468,7 +500,16 @@ function abcontent_render_section( $content_endpoint, $settings_section, $type )
     }
 
     $output .= '</div>';
+    $output .= abcontent_glow_script();
     return $output;
+}
+
+/* Cursor-follow gradient glow script (emitted once per page) */
+function abcontent_glow_script() {
+    static $emitted = false;
+    if ( $emitted ) return '';
+    $emitted = true;
+    return "<script>(function(){if(window.__abGlow)return;window.__abGlow=true;document.addEventListener('mousemove',function(e){var c=e.target.closest('[data-glow]');if(!c)return;var g=c.querySelector('.ab-glow');if(!g)return;var r=c.getBoundingClientRect();g.style.left=(e.clientX-r.left)+'px';g.style.top=(e.clientY-r.top)+'px';});})();</script>";
 }
 
 /* ══════════════════════════════════════════════

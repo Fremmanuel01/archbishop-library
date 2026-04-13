@@ -1,4 +1,7 @@
 const db = require('../database');
+const { marked } = require('marked');
+
+marked.setOptions({ gfm: true, breaks: false, headerIds: false, mangle: false });
 
 /**
  * Renders a full standalone HTML page for a single content item.
@@ -15,6 +18,7 @@ function renderSinglePost(item, type) {
   const coverPhoto = item.cover_photo_url || item.thumbnail_url || '';
   const pdfUrl = item.pdf_url || '';
   const description = item.description || item.body || '';
+  const descriptionHtml = description ? marked.parse(description) : '';
   const typeLabel = type === 'pastoral_letters' ? 'Pastoral Letter'
     : type === 'homilies' ? 'Reflection' : 'Teaching';
   const typePath = type === 'pastoral_letters' ? 'letter'
@@ -284,29 +288,59 @@ function renderSinglePost(item, type) {
       background: var(--gold);
     }
 
-    /* ── Summary Card ────────────────── */
-    .summary-card {
+    /* ── Full Content (rendered markdown) ── */
+    .content-body {
       background: var(--white);
       border-radius: var(--radius-lg);
-      padding: var(--space-60) var(--space-60);
+      padding: var(--space-70) var(--space-60);
       margin: -50px auto var(--space-60);
       position: relative;
       z-index: 3;
       box-shadow: var(--shadow-deep);
       border-top: 4px solid var(--gold);
-    }
-    .summary-card h2 {
-      font-family: 'Cinzel', serif;
-      font-size: 14px;
-      color: var(--gold);
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      margin-bottom: var(--space-40);
-    }
-    .summary-card p {
+      font-family: 'Lora', Georgia, serif;
       font-size: 17px;
+      line-height: 1.85;
       color: var(--text);
-      line-height: 1.8;
+    }
+    .content-body > *:first-child { margin-top: 0; }
+    .content-body > *:last-child { margin-bottom: 0; }
+    .content-body h1,
+    .content-body h2,
+    .content-body h3,
+    .content-body h4 {
+      font-family: 'Cinzel', serif;
+      color: var(--navy);
+      line-height: 1.3;
+      margin: var(--space-60) 0 var(--space-40);
+      font-weight: 600;
+    }
+    .content-body h1 { font-size: 28px; }
+    .content-body h2 { font-size: 23px; }
+    .content-body h3 { font-size: 19px; color: var(--navy-dark); }
+    .content-body h4 { font-size: 16px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--gold); }
+    .content-body p { margin: 0 0 var(--space-40); }
+    .content-body strong { color: var(--navy-dark); font-weight: 600; }
+    .content-body em { font-style: italic; color: var(--text); }
+    .content-body ul,
+    .content-body ol { margin: 0 0 var(--space-40) var(--space-50); }
+    .content-body li { margin-bottom: var(--space-30); }
+    .content-body blockquote {
+      border-left: 3px solid var(--gold);
+      padding: var(--space-30) var(--space-50);
+      margin: var(--space-50) 0;
+      font-style: italic;
+      color: var(--navy);
+      background: var(--cream);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+    .content-body a { color: var(--gold); text-decoration: underline; text-underline-offset: 3px; }
+    .content-body hr { border: none; border-top: 1px solid var(--cream-dark); margin: var(--space-60) 0; }
+    @media (max-width: 640px) {
+      .content-body { padding: var(--space-50) var(--space-40); font-size: 16px; }
+      .content-body h1 { font-size: 23px; }
+      .content-body h2 { font-size: 20px; }
+      .content-body h3 { font-size: 17px; }
     }
 
     /* ── Key Quote ────────────────────── */
@@ -582,12 +616,11 @@ ${showTopBtn ? `<div class="back-row">${backButtonHtml}</div>` : ''}
 
 <div class="container">
 
-  <!-- Summary -->
-  ${description ? `
-  <div class="summary-card">
-    <h2>✦ About This Document</h2>
-    <p>${esc(description)}</p>
-  </div>` : ''}
+  <!-- Full Content -->
+  ${descriptionHtml ? `
+  <article class="content-body">
+    ${descriptionHtml}
+  </article>` : ''}
 
   <!-- Key Quote -->
   ${item.key_quote ? `
